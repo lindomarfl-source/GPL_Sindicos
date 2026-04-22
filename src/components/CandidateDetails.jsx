@@ -109,6 +109,7 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
     loading, 
     updateCandidate, 
     globalDocTypes, 
+    globalQuestions,
     addGlobalDocType, 
     deleteGlobalDocType, 
     resetGlobalDocTypes,
@@ -666,18 +667,7 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
                 </div>
 
                 <div className="space-y-4">
-                  {[
-                    { key: 'obras', q: 'Gestão de Obras e Aditivos', d: 'Como gerenciou obras estruturais e aditivos de preço?' },
-                    { key: 'custos', q: 'Redução de Inadimplência', d: 'Estratégia para reduzir dívidas sem aumentar a tensão.' },
-                    { key: 'transparencia', q: 'Governança e Notas Fiscais', d: 'Procedimento técnico ao ser questionado por moradores.' },
-                    { key: 'conflitos', q: 'Liderança em Assembleias', d: 'Como retomou as rédeas de uma pauta descontrolada?' },
-                    { key: 'manutencao', q: 'Primeiros 90 Dias / Manutenção', d: 'Visão sobre os contratos preventivos atuais.' },
-                    { key: 'equipe', q: 'Gestão de Staff / Vícios', d: 'Como lidará com a equipe operacional legada?' },
-                    { key: 'lgpd', q: 'Proteção de Dados / LGPD', d: 'Segurança das câmeras e dados sensíveis no condomínio.' },
-                    { key: 'emergencia', q: 'Compromisso 24h / Emergência', d: 'Protocolo de resposta às 3h da manhã de domingo.' },
-                    { key: 'etica', q: 'Integridade e Dilemas Éticos', d: 'Situações onde teve que negar pedidos irregulares.' },
-                    { key: 'diferencial', q: 'Diferencial x Concorrência', d: 'Por que VOCÊ e não uma empresa de maior VGV?' }
-                  ].map((item, idx) => (
+                  {(globalQuestions || []).map((item, idx) => (
                     <Card key={item.key} className="p-6 bg-slate-900/40 border-slate-800 hover:border-slate-700 transition-all">
                       <div className="flex flex-col gap-4">
                         <div className="flex items-start justify-between gap-4">

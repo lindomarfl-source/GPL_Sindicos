@@ -25,7 +25,21 @@ export const CandidatesProvider = ({ children }) => {
     { key: 'complementar', label: 'Materiais e Certificados Complementares', category: 'Extras' }
   ];
 
+  const defaultQuestions = [
+    { key: 'obras', q: 'Gestão de Obras e Aditivos', d: 'Como gerenciou obras estruturais e aditivos de preço?' },
+    { key: 'custos', q: 'Redução de Inadimplência', d: 'Estratégia para reduzir dívidas sem aumentar a tensão.' },
+    { key: 'transparencia', q: 'Governança e Notas Fiscais', d: 'Procedimento técnico ao ser questionado por moradores.' },
+    { key: 'conflitos', q: 'Liderança em Assembleias', d: 'Como retomou as rédeas de uma pauta descontrolada?' },
+    { key: 'manutencao', q: 'Primeiros 90 Dias / Manutenção', d: 'Visão sobre os contratos preventivos atuais.' },
+    { key: 'equipe', q: 'Gestão de Staff / Vícios', d: 'Como lidará com a equipe operacional legada?' },
+    { key: 'lgpd', q: 'Proteção de Dados / LGPD', d: 'Segurança das câmeras e dados sensíveis no condomínio.' },
+    { key: 'emergencia', q: 'Compromisso 24h / Emergência', d: 'Protocolo de resposta às 3h da manhã de domingo.' },
+    { key: 'etica', q: 'Integridade e Dilemas Éticos', d: 'Situações onde teve que negar pedidos irregulares.' },
+    { key: 'diferencial', q: 'Diferencial x Concorrência', d: 'Por que VOCÊ e não uma empresa de maior VGV?' }
+  ];
+
   const [globalDocTypes, setGlobalDocTypes] = useState(defaultDocs);
+  const [globalQuestions, setGlobalQuestions] = useState(defaultQuestions);
 
   // 1. Carregar dados do Supabase ao iniciar
   useEffect(() => {
@@ -162,6 +176,7 @@ export const CandidatesProvider = ({ children }) => {
       updateCandidate, 
       deleteCandidate,
       globalDocTypes,
+      globalQuestions,
       notification,
       showNotification,
       resetGlobalDocTypes: () => {
@@ -175,6 +190,22 @@ export const CandidatesProvider = ({ children }) => {
       deleteGlobalDocType: (key, label = 'Requisito') => {
         setGlobalDocTypes(globalDocTypes.filter(d => d.key !== key));
         showNotification(`Requisito "${label}" removido com sucesso!`, 'success');
+      },
+      resetGlobalQuestions: () => {
+        setGlobalQuestions(defaultQuestions);
+        showNotification('Roteiro de entrevista restaurado!', 'success');
+      },
+      addGlobalQuestion: (q) => {
+        setGlobalQuestions([...globalQuestions, { ...q, key: Date.now().toString() }]);
+        showNotification('Nova pergunta adicionada ao roteiro!');
+      },
+      updateGlobalQuestion: (key, updates) => {
+        setGlobalQuestions(prev => prev.map(q => q.key === key ? { ...q, ...updates } : q));
+        showNotification('Pergunta atualizada!');
+      },
+      deleteGlobalQuestion: (key) => {
+        setGlobalQuestions(prev => prev.filter(q => q.key !== key));
+        showNotification('Pergunta removida do roteiro.', 'warning');
       }
     }}>
       {children}

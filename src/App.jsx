@@ -6,7 +6,8 @@ import { Dashboard } from './components/Dashboard';
 import { CandidateManager } from './components/CandidateManager';
 import { CandidateDetails } from './components/CandidateDetails';
 import { ComparisonView } from './components/ComparisonView';
-import { LayoutDashboard, Users, BarChart2, LogOut, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { QuestionsManager } from './components/QuestionsManager';
+import { LayoutDashboard, Users, BarChart2, LogOut, CheckCircle2, AlertCircle, X, Mic } from 'lucide-react';
 
 const Toast = ({ notification }) => {
   if (!notification) return null;
@@ -76,6 +77,7 @@ const App = () => {
           <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
           <NavItem id="candidatos" icon={Users} label="Candidatos" />
           <NavItem id="comparativo" icon={BarChart2} label="Comparativo" />
+          <NavItem id="roteiro" icon={Mic} label="Roteiro" />
         </nav>
 
         <div className="pt-6 border-t border-slate-800">
@@ -97,6 +99,7 @@ const App = () => {
               {activeTab === 'dashboard' ? 'Dashboard' : 
                activeTab === 'candidatos' ? 'Candidatos' : 
                activeTab === 'comparativo' ? 'Comparativo' : 
+               activeTab === 'roteiro' ? 'Roteiro Técnico' : 
                activeTab === 'detalhes' ? 'Ficha Técnica' : 'Portal GPL'}
             </h2>
             <p className="text-[10px] md:text-sm text-slate-500 mt-0.5 font-bold uppercase tracking-widest">
@@ -116,6 +119,8 @@ const App = () => {
 
         {activeTab === 'comparativo' && <ComparisonView />}
 
+        {activeTab === 'roteiro' && <QuestionsManager />}
+
         {activeTab === 'detalhes' && (
           <CandidateDetails 
             candidateId={selectedCandidateId} 
@@ -125,9 +130,10 @@ const App = () => {
       </main>
 
       {/* Bottom Navigation Mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 px-6 py-3 flex lg:hidden z-50 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+      <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 px-4 py-3 flex lg:hidden z-50 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         <BottomNavItem id="dashboard" icon={LayoutDashboard} label="Home" />
         <BottomNavItem id="candidatos" icon={Users} label="Candidatos" />
+        <BottomNavItem id="roteiro" icon={Mic} label="Roteiro" />
         <BottomNavItem id="comparativo" icon={BarChart2} label="Análise" />
         <button 
           onClick={logout}
