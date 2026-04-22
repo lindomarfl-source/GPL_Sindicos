@@ -179,25 +179,169 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
   };
 
   const exportPDF = async () => {
-    const element = reportRef.current;
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#0f172a'
-    });
-    const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4'
     });
+
+    const blue = [59, 130, 246];
+    const darkBlue = [15, 23, 42];
+    const gray = [100, 116, 139];
+    const white = [255, 255, 255];
+
+    // --- Header ---
+    pdf.setFillColor(...darkBlue);
+    pdf.rect(0, 0, 210, 40, 'F');
     
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    pdf.setTextColor(...white);
+    pdf.setFontSize(22);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('RELATÓRIO DE QUALIFICAÇÃO TÉCNICA', 15, 20);
     
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`Relatório_GPL_${candidate.nome.replace(/\s+/g, '_')}.pdf`);
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('CONDOMÍNIO GRAND PARK LINDÓIA - ELEIÇÃO SÍNDICO 2026', 15, 28);
+    pdf.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')}`, 155, 28);
+
+    let y = 55;
+
+    // --- Perfil Principal ---
+    pdf.setTextColor(...darkBlue);
+    pdf.setFontSize(18);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(candidate.nome.toUpperCase(), 15, y);
+    y += 8;
+    
+    pdf.setFontSize(11);
+    pdf.setTextColor(...gray);
+    pdf.text(`PERFIL: ${candidate.tipo === 'PJ' ? 'PESSOA JURÍDICA (ADMINISTRADORA)' : 'PESSOA FÍSICA (MORADOR)'}`, 15, y);
+    pdf.text(`STATUS: ${candidate.status.toUpperCase()}`, 130, y);
+    
+    y += 15;
+
+    // --- KPIs Box ---
+    pdf.setDrawColor(226, 232, 240);
+    pdf.setFillColor(248, 250, 252);
+    pdf.roundedRect(15, y, 180, 25, 3, 3, 'FD');
+    
+    const progress = Math.round(calculateProgress());
+    const score = (Object.values(candidate.avaliacao || {}).reduce((a,b) => a+b, 0) / 6).toFixed(1);
+
+    pdf.setTextColor(...darkBlue);
+    pdf.setFontSize(9);
+    pdf.text('CONFORMIDADE DOCUMENTAL', 25, y + 10);
+    pdf.setFontSize(14);
+    pdf.text(`${progress}%`, 25, y + 18);
+
+    pdf.setFontSize(9);
+    pdf.text('SCORE TÉCNICO GERAL', 85, y + 10);
+    pdf.setFontSize(14);
+    pdf.text(`${score} / 5.0`, 85, y + 18);
+
+    pdf.setFontSize(9);
+    pdf.text('ANÁLISE DE RISCO', 145, y + 10);
+    pdf.setFontSize(12);
+    pdf.setTextColor(candidate.risco === 'alto' ? [220, 38, 38] : [22, 163, 74]);
+    pdf.text((candidate.risco || 'BAIXO').toUpperCase(), 145, y + 18);
+
+    y += 40;
+
+    // --- Seção: Documentação ---
+    pdf.setTextColor(...darkBlue);
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('CHECKLIST DE DOCUMENTAÇÃO', 15, y);
+    y += 8;
+
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(...gray);
+    
+    const applicableDocs = (globalDocTypes || []).filter(doc => {
+      if (doc.category === 'Pessoa Jurídica' && candidate.tipo === 'PF') return false;
+      return true;
+    });
+
+    applicableDocs.forEach((doc, index) => {
+      if (y > 270) { pdf.addPage(); y = 20; }
+      const status = (candidate.documentacao && candidate.documentacao[doc.key]) === 'entregue' ? 'CONCLUÍDO' : 'PENDENTE';
+      
+      pdf.setDrawColor(241, 245, 249);
+      pdf.line(15, y + 1, 195, y + 1);
+      
+      pdf.setTextColor(...darkBlue);
+      pdf.text(doc.label, 15, y);
+      
+      pdf.setTextColor(status === 'CONCLUÍDO' ? [22, 163, 74] : [234, 179, 8]);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(status, 170, y, { align: 'right' });
+      pdf.setFont('helvetica', 'normal');
+      
+      y += 7;
+    });
+
+    y += 15;
+
+    // --- Seção: Avaliação Técnica ---
+    if (y > 240) { pdf.addPage(); y = 20; }
+    pdf.setTextColor(...darkBlue);
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('AVALIAÇÃO DE COMPETÊNCIAS', 15, y);
+    y += 10;
+
+    const evalFields = [
+      { label: 'Comunicação', val: candidate.avaliacao?.comunicacao },
+      { label: 'Liderança', val: candidate.avaliacao?.lideranca },
+      { label: 'Técnica', val: candidate.avaliacao?.tecnica },
+      { label: 'Conflitos', val: candidate.avaliacao?.conflitos },
+      { label: 'Planejamento', val: candidate.avaliacao?.planejamento },
+      { label: 'Organização', val: candidate.avaliacao?.organizacao }
+    ];
+
+    pdf.setFontSize(9);
+    evalFields.forEach(field => {
+      pdf.setTextColor(...darkBlue);
+      pdf.text(field.label, 15, y);
+      
+      pdf.setFillColor(241, 245, 249);
+      pdf.rect(60, y - 3, 100, 3, 'F');
+      pdf.setFillColor(...blue);
+      pdf.rect(60, y - 3, (field.val || 0) * 20, 3, 'F');
+      
+      pdf.text(`${field.val || 0}`, 165, y);
+      y += 8;
+    });
+
+    y += 15;
+
+    // --- Seção: Parecer ---
+    if (y > 220) { pdf.addPage(); y = 20; }
+    pdf.setTextColor(...darkBlue);
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('PARECER TÉCNICO DA COMISSÃO', 15, y);
+    y += 8;
+
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(51, 65, 85);
+    
+    const lines = pdf.splitTextToSize(localParecer || 'Nenhum parecer técnico registrado até o momento.', 180);
+    pdf.text(lines, 15, y);
+
+    // --- Footer ---
+    const pageCount = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(...gray);
+        pdf.text('Este documento é parte integrante do processo de auditoria de candidatos GCP.', 105, 285, { align: 'center' });
+        pdf.text(`Página ${i} de ${pageCount}`, 195, 285, { align: 'right' });
+    }
+
+    pdf.save(`Relatorio_Oficial_GPL_${candidate.nome.replace(/\s+/g, '_')}.pdf`);
   };
 
   const calculateProgress = () => {
