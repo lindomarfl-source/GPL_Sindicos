@@ -322,20 +322,24 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
   };
 
   const calculateProgress = () => {
-    if (!candidate || !globalDocTypes) return 0;
+    if (!candidate || !globalDocTypes || globalDocTypes.length === 0) return 0;
     
-    // Filtra quais documentos são aplicáveis a este candidato (ex: oculta PJ para candidatos PF)
-    const applicableDocs = globalDocTypes.filter(doc => {
+    // 1. Identifica quais documentos são REALMENTE exigidos deste candidato
+    const requiredDocs = globalDocTypes.filter(doc => {
       if (doc.category === 'Pessoa Jurídica' && candidate.tipo === 'PF') return false;
       return true;
     });
 
-    if (applicableDocs.length === 0) return 0;
+    if (requiredDocs.length === 0) return 0;
 
+    // 2. Conta apenas os exigidos que estão marcados como 'entregue'
     const docData = candidate.documentacao || {};
-    const delivered = applicableDocs.filter(doc => docData[doc.key] === 'entregue').length;
+    const deliveredCount = requiredDocs.filter(doc => docData[doc.key] === 'entregue').length;
     
-    return (delivered / applicableDocs.length) * 100;
+    // 3. Cálculo final
+    const rawProgress = (deliveredCount / requiredDocs.length) * 100;
+    
+    return Math.min(Math.max(rawProgress, 0), 100);
   };
 
   const calculateTechScore = () => {
