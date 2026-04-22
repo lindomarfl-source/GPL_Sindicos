@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useCandidates } from '../context/CandidatesContext';
 import { Card, Badge, Button } from './Common';
 import { 
@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { AddDocumentModal } from './AddDocumentModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const ProgressBar = ({ value, label }) => (
   <div className="mb-4">
@@ -110,6 +112,7 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [localParecer, setLocalParecer] = useState('');
+  const reportRef = useRef();
   
   const candidate = candidates?.find(c => c.id === candidateId);
   
@@ -175,13 +178,43 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
     }
   };
 
+  const exportPDF = async () => {
+    const element = reportRef.current;
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#0f172a'
+    });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+    
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`Relatório_GPL_${candidate.nome.replace(/\s+/g, '_')}.pdf`);
+  };
+
   const calculateProgress = () => {
-    if (!candidate || !candidate.documentacao) return 0;
-    const docData = candidate.documentacao;
-    const docs = Object.values(docData);
-    if (docs.length === 0) return 0;
-    const delivered = docs.filter(status => status === 'entregue').length;
-    return (delivered / docs.length) * 100;
+    if (!candidate || !globalDocTypes) return 0;
+    
+    // Filtra quais documentos são aplicáveis a este candidato (ex: oculta PJ para candidatos PF)
+    const applicableDocs = globalDocTypes.filter(doc => {
+      if (doc.category === 'Pessoa Jurídica' && candidate.tipo === 'PF') return false;
+      return true;
+    });
+
+    if (applicableDocs.length === 0) return 0;
+
+    const docData = candidate.documentacao || {};
+    const delivered = applicableDocs.filter(doc => docData[doc.key] === 'entregue').length;
+    
+    return (delivered / applicableDocs.length) * 100;
   };
 
   const calculateTechScore = () => {
@@ -216,6 +249,9 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
           Voltar
         </Button>
         <div className="flex items-center gap-3">
+          <Button variant="secondary" onClick={exportPDF} icon={FilePlus}>
+            Baixar Relatório
+          </Button>
           {saveSuccess && (
             <div className="flex items-center gap-2 text-green-400 bg-green-500/10 px-4 py-2 rounded-xl border border-green-500/20">
               <Check size={16} className="font-bold" />
@@ -232,7 +268,7 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div ref={reportRef} className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-2">
         <div className="lg:col-span-1 space-y-6">
           <Card className="text-center p-8 border-b-4 border-b-blue-500 shadow-xl shadow-blue-900/10">
             <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-4 ${candidate.tipo === 'PJ' ? 'bg-purple-600/20 text-purple-400' : 'bg-blue-600/20 text-blue-400'}`}>
