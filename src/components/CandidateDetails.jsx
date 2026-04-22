@@ -104,7 +104,16 @@ const RatingItem = ({ label, value, onChange, icon: Icon, description }) => (
 );
 
 export const CandidateDetails = ({ candidateId, onBack }) => {
-  const { candidates, loading, updateCandidate, globalDocTypes, addGlobalDocType, deleteGlobalDocType, resetGlobalDocTypes } = useCandidates();
+  const { 
+    candidates, 
+    loading, 
+    updateCandidate, 
+    globalDocTypes, 
+    addGlobalDocType, 
+    deleteGlobalDocType, 
+    resetGlobalDocTypes,
+    showNotification 
+  } = useCandidates();
   const [activeSubTab, setActiveSubTab] = useState('info');
   const [isAddDocOpen, setIsAddDocOpen] = useState(false);
   const [isDeleteDocModalOpen, setIsDeleteDocModalOpen] = useState(false);
