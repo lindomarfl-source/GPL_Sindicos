@@ -269,13 +269,20 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
       });
 
       docsToPrint.forEach((d) => {
-        if (currentY > 270) { doc.addPage(); currentY = 20; }
-        const status = (candidate.documentacao?.[d.key] === 'entregue') ? 'OK' : 'PENDENTE';
-        doc.setTextColor(100, 116, 139);
-        doc.text(String(d.label).substring(0, 80), 15, currentY);
-        doc.setTextColor(status === 'OK' ? [22, 163, 74] : [220, 38, 38]);
-        doc.text(status, 180, currentY, { align: 'right' });
-        currentY += 6;
+        try {
+          if (currentY > 270) { doc.addPage(); currentY = 20; }
+          const status = (candidate.documentacao?.[d.key] === 'entregue') ? 'OK' : 'PENDENTE';
+          
+          doc.setTextColor(100, 116, 139);
+          const safeLabel = String(d.label || 'Documento sem nome').substring(0, 75);
+          doc.text(safeLabel, 15, currentY);
+          
+          doc.setTextColor(status === 'OK' ? [22, 163, 74] : [220, 38, 38]);
+          doc.text(String(status), 180, currentY, { align: 'right' });
+          currentY += 6;
+        } catch (innerErr) {
+          console.error('Erro ao renderizar linha de documento no PDF:', innerErr);
+        }
       });
 
       currentY += 15;
