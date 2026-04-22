@@ -220,33 +220,38 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
       let currentY = 50;
 
       // 2. Identificação
-      doc.setTextColor(...primaryColor);
-      doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
-      doc.text(String(candidate.nome || 'Candidato').toUpperCase(), 15, currentY);
-      
-      currentY += 10;
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(100, 116, 139);
-      doc.text(`TIPO: ${candidate.tipo === 'PJ' ? 'PESSOA JURIDICA' : 'PESSOA FISICA'}`, 15, currentY);
-      doc.text(`STATUS: ${String(candidate.status || 'PENDENTE').toUpperCase()}`, 110, currentY);
+      try {
+        doc.setTextColor(...primaryColor);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text(String(candidate.nome || 'Candidato').toUpperCase(), 15, currentY);
+        
+        currentY += 10;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text(`TIPO: ${candidate.tipo === 'PJ' ? 'PESSOA JURIDICA' : 'PESSOA FISICA'}`, 15, currentY);
+        doc.text(`STATUS: ${String(candidate.status || 'PENDENTE').toUpperCase()}`, 110, currentY);
+      } catch (e) { console.error('Erro na seção de ID do PDF', e); }
 
       currentY += 15;
 
       // 3. Resumo de Scores
-      doc.setDrawColor(200, 200, 200);
-      doc.setFillColor(245, 245, 245);
-      doc.rect(15, currentY, 180, 20, 'F');
-      
-      doc.setTextColor(...primaryColor);
-      doc.setFont('helvetica', 'bold');
-      doc.text('PROGRESSO DOCUMENTAL:', 20, currentY + 12);
-      doc.text(`${Math.round(calculateProgress())}%`, 75, currentY + 12);
-      
-      doc.text('SCORE TÉCNICO:', 110, currentY + 12);
-      const scoreValue = (Object.values(candidate.avaliacao || {}).reduce((a,b) => a+(Number(b)||0), 0) / 6).toFixed(1);
-      doc.text(`${scoreValue} / 5.0`, 145, currentY + 12);
+      try {
+        doc.setDrawColor(200, 200, 200);
+        doc.setFillColor(245, 245, 245);
+        doc.rect(15, currentY, 180, 20, 'F');
+        
+        doc.setTextColor(...primaryColor);
+        doc.setFont('helvetica', 'bold');
+        doc.text('PROGRESSO DOCUMENTAL:', 20, currentY + 12);
+        doc.text(`${Math.round(calculateProgress())}%`, 75, currentY + 12);
+        
+        doc.text('SCORE TÉCNICO:', 110, currentY + 12);
+        const evalData = candidate.avaliacao || {};
+        const scoreValue = (Object.values(evalData).reduce((a,b) => a+(Number(b)||0), 0) / 6).toFixed(1);
+        doc.text(`${scoreValue} / 5.0`, 145, currentY + 12);
+      } catch (e) { console.error('Erro na seção de Scores do PDF', e); }
 
       currentY += 35;
 
