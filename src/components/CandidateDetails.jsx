@@ -270,16 +270,24 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
 
       docsToPrint.forEach((d) => {
         try {
-          if (currentY > 270) { doc.addPage(); currentY = 20; }
           const status = (candidate.documentacao?.[d.key] === 'entregue') ? 'OK' : 'PENDENTE';
+          const labelText = `• ${String(d.label || 'Documento')}`;
           
-          doc.setTextColor(100, 116, 139);
-          const safeLabel = String(d.label || 'Documento sem nome').substring(0, 75);
-          doc.text(safeLabel, 15, currentY);
+          // Quebra o texto automaticamente se for muito longo para a largura da página
+          const wrappedLabel = doc.splitTextToSize(labelText, 160);
+          const linesCount = wrappedLabel.length;
+          
+          if (currentY + (linesCount * 5) > 275) { doc.addPage(); currentY = 20; }
+          
+          doc.setTextColor(71, 85, 105); // Cinza Slate mais suave
+          doc.text(wrappedLabel, 15, currentY);
           
           doc.setTextColor(status === 'OK' ? [22, 163, 74] : [220, 38, 38]);
-          doc.text(String(status), 180, currentY, { align: 'right' });
-          currentY += 6;
+          doc.setFont('helvetica', 'bold');
+          doc.text(String(status), 195, currentY, { align: 'right' });
+          doc.setFont('helvetica', 'normal');
+          
+          currentY += (linesCount * 5) + 3; // Espaçamento dinâmico baseado no número de linhas
         } catch (innerErr) {
           console.error('Erro ao renderizar linha de documento no PDF:', innerErr);
         }
