@@ -13,14 +13,14 @@ const Toast = ({ notification }) => {
   const isSuccess = notification.type === 'success';
   
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] animate-in slide-in-from-top-8 duration-500">
+    <div className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-[9999] animate-in slide-in-from-top-8 duration-500 w-[90%] md:w-auto">
       <div className={`flex items-center gap-3 px-6 py-3 rounded-2xl border shadow-2xl backdrop-blur-xl ${
         isSuccess 
           ? 'bg-green-500/10 border-green-500/20 text-green-400' 
           : 'bg-red-500/10 border-red-500/20 text-red-400'
       }`}>
-        {isSuccess ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
-        <span className="font-bold text-sm tracking-tight">{notification.message}</span>
+        {isSuccess ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+        <span className="font-bold text-xs md:text-sm tracking-tight">{notification.message}</span>
       </div>
     </div>
   );
@@ -44,6 +44,20 @@ const App = () => {
     >
       <Icon size={20} />
       <span className="font-medium">{label}</span>
+    </button>
+  );
+
+  const BottomNavItem = ({ id, icon: Icon, label }) => (
+    <button
+      onClick={() => { setActiveTab(id); setSelectedCandidateId(null); }}
+      className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-all ${
+        activeTab === id || (activeTab === 'detalhes' && id === 'candidatos')
+          ? 'text-blue-500 scale-110' 
+          : 'text-slate-500'
+      }`}
+    >
+      <Icon size={20} />
+      <span className="text-[10px] font-black uppercase tracking-tighter">{label}</span>
     </button>
   );
 
@@ -76,19 +90,21 @@ const App = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10">
-        <header className="flex justify-between items-center mb-8">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10 pb-24 lg:pb-10">
+        <header className="flex justify-between items-center mb-6 md:mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-white tracking-tight">
-              {activeTab === 'dashboard' ? 'Painel de Inteligência' : 
-               activeTab === 'candidatos' ? 'Gestão de Candidatos' : 
-               activeTab === 'comparativo' ? 'Análise Comparativa' : 
-               activeTab === 'detalhes' ? 'Ficha do Candidato' : 'Portal de Seleção'}
+            <h2 className="text-xl md:text-3xl font-black text-white tracking-tight">
+              {activeTab === 'dashboard' ? 'Dashboard' : 
+               activeTab === 'candidatos' ? 'Candidatos' : 
+               activeTab === 'comparativo' ? 'Comparativo' : 
+               activeTab === 'detalhes' ? 'Ficha Técnica' : 'Portal GPL'}
             </h2>
-            <p className="text-slate-400 mt-1">Sincronizado com Supabase Cloud.</p>
+            <p className="text-[10px] md:text-sm text-slate-500 mt-0.5 font-bold uppercase tracking-widest">
+              Sincronizado com Supabase
+            </p>
           </div>
           <div className="flex items-center gap-4">
-             <div className="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
+             <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-black text-xs">
                GPL
              </div>
           </div>
@@ -103,10 +119,24 @@ const App = () => {
         {activeTab === 'detalhes' && (
           <CandidateDetails 
             candidateId={selectedCandidateId} 
-            onBack={() => setActiveTab('dashboard')} 
+            onBack={() => setActiveTab('candidatos')} 
           />
         )}
       </main>
+
+      {/* Bottom Navigation Mobile */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 px-6 py-3 flex lg:hidden z-50 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <BottomNavItem id="dashboard" icon={LayoutDashboard} label="Home" />
+        <BottomNavItem id="candidatos" icon={Users} label="Candidatos" />
+        <BottomNavItem id="comparativo" icon={BarChart2} label="Análise" />
+        <button 
+          onClick={logout}
+          className="flex flex-col items-center justify-center gap-1 flex-1 py-1 text-slate-500"
+        >
+          <LogOut size={20} />
+          <span className="text-[10px] font-black uppercase tracking-tighter">Sair</span>
+        </button>
+      </nav>
     </div>
   );
 };

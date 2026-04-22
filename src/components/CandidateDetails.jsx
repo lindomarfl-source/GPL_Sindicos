@@ -364,32 +364,33 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
   );
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <Button variant="secondary" onClick={onBack} icon={ArrowLeft}>
+        <Button variant="secondary" onClick={onBack} icon={ArrowLeft} className="w-fit">
           Voltar
         </Button>
-        <div className="flex items-center gap-3">
-          <Button variant="secondary" onClick={exportPDF} icon={FilePlus}>
-            Baixar Relatório
+        <div className="flex items-center gap-2 md:gap-3">
+          <Button variant="secondary" onClick={exportPDF} icon={FilePlus} className="flex-1 md:flex-none text-[10px] md:text-sm">
+            PDF
           </Button>
           {saveSuccess && (
-            <div className="flex items-center gap-2 text-green-400 bg-green-500/10 px-4 py-2 rounded-xl border border-green-500/20">
+            <div className="hidden md:flex items-center gap-2 text-green-400 bg-green-500/10 px-4 py-2 rounded-xl border border-green-500/20">
               <Check size={16} className="font-bold" />
-              <span className="text-sm font-bold">Alterações salvas!</span>
+              <span className="text-sm font-bold">Salvo!</span>
             </div>
           )}
           <Button 
             icon={Save} 
             onClick={handleSave}
             disabled={isSaving}
+            className="flex-1 md:flex-none text-[10px] md:text-sm"
           >
-            {isSaving ? 'Salvando...' : 'Salvar Alterações'}
+            {isSaving ? '...' : 'Salvar'}
           </Button>
         </div>
       </div>
 
-      <div ref={reportRef} className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-1 md:p-2">
         <div className="lg:col-span-1 space-y-6">
           <Card className="text-center p-8 border-b-4 border-b-blue-500 shadow-xl shadow-blue-900/10">
             <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-4 ${candidate.tipo === 'PJ' ? 'bg-purple-600/20 text-purple-400' : 'bg-blue-600/20 text-blue-400'}`}>
@@ -463,11 +464,13 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
         </div>
 
         <div className="lg:col-span-2 space-y-6">
-          <div className="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800">
-            <button onClick={() => setActiveSubTab('info')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all ${activeSubTab === 'info' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><User size={18} /> Dados</button>
-            <button onClick={() => setActiveSubTab('docs')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all ${activeSubTab === 'docs' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><FileCheck size={18} /> Documentos</button>
-            <button onClick={() => setActiveSubTab('tech')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all ${activeSubTab === 'tech' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><Star size={18} /> Técnico</button>
-            <button onClick={() => setActiveSubTab('interview')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all ${activeSubTab === 'interview' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><Mic size={18} /> Entrevista</button>
+          <div className="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar">
+            <div className="flex min-w-max md:min-w-0 md:w-full">
+              <button onClick={() => setActiveSubTab('info')} className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all ${activeSubTab === 'info' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><User size={16} /> <span className="text-xs font-bold uppercase tracking-tighter">Dados</span></button>
+              <button onClick={() => setActiveSubTab('docs')} className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all ${activeSubTab === 'docs' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><FileCheck size={16} /> <span className="text-xs font-bold uppercase tracking-tighter">Docs</span></button>
+              <button onClick={() => setActiveSubTab('tech')} className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all ${activeSubTab === 'tech' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><Star size={16} /> <span className="text-xs font-bold uppercase tracking-tighter">Técnico</span></button>
+              <button onClick={() => setActiveSubTab('interview')} className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all ${activeSubTab === 'interview' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><Mic size={16} /> <span className="text-xs font-bold uppercase tracking-tighter">Apoio</span></button>
+            </div>
           </div>
 
           <div className="min-h-[400px]">

@@ -17,12 +17,12 @@ const KPICard = ({ title, value, subtitle, icon: Icon, color, trend }) => (
     <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full opacity-10 group-hover:scale-110 transition-transform ${color}`} />
     <div className="flex items-start justify-between relative z-10">
       <div>
-        <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">{title}</p>
+        <p className="text-slate-400 text-[10px] md:text-xs font-black uppercase tracking-widest mb-1">{title}</p>
         <div className="flex items-baseline gap-2">
-          <h3 className="text-3xl font-black text-white">{value}</h3>
+          <h3 className="text-2xl md:text-3xl font-black text-white">{value}</h3>
           {trend && <span className="text-[10px] text-green-400 font-bold">{trend}</span>}
         </div>
-        <p className="text-slate-500 text-[10px] mt-1 font-medium">{subtitle}</p>
+        <p className="text-slate-500 text-[9px] md:text-[10px] mt-1 font-medium">{subtitle}</p>
       </div>
       <div className={`p-3 rounded-2xl ${color} bg-opacity-20 text-white`}>
         <Icon size={20} className={color.replace('bg-', 'text-')} />
@@ -74,7 +74,7 @@ export const Dashboard = ({ onSelectCandidate }) => {
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
       {/* KPI Header */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <KPICard 
           title="Inscritos" 
           value={stats.total} 
@@ -135,7 +135,7 @@ export const Dashboard = ({ onSelectCandidate }) => {
 
         {/* Distribuição de Perfil */}
         <Card className="p-6">
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 mb-6 md:mb-8">
             <div className="p-2 bg-purple-500/10 rounded-lg text-purple-500">
               <PieChartIcon size={20} />
             </div>

@@ -40,8 +40,9 @@ export const CandidateManager = ({ onSelectCandidate }) => {
         </div>
       </div>
 
-      <Card className="p-0 overflow-hidden border-slate-800 shadow-2xl">
-        <div className="overflow-x-auto">
+      <Card className="p-0 overflow-hidden border-slate-800 shadow-2xl bg-transparent md:bg-slate-900/40">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-700 bg-slate-800/50">
@@ -113,6 +114,62 @@ export const CandidateManager = ({ onSelectCandidate }) => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4 p-2">
+          {filteredCandidates.length === 0 ? (
+            <div className="py-20 text-center text-slate-500 font-medium">
+              Nenhum candidato localizado.
+            </div>
+          ) : (
+            filteredCandidates.map((candidate) => (
+              <div 
+                key={candidate.id}
+                onClick={() => onSelectCandidate(candidate.id)}
+                className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 active:scale-[0.98] transition-all space-y-4"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-black text-white uppercase tracking-tight text-lg">{candidate.nome}</h3>
+                    <p className="text-[10px] text-slate-500 font-mono mt-1">{candidate.registro}</p>
+                  </div>
+                  <Badge status={candidate.status}>{candidate.status}</Badge>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-slate-800/50">
+                  <div className="flex gap-4">
+                    <span className={`text-[10px] px-2 py-1 rounded font-black uppercase tracking-tighter ${candidate.tipo === 'PJ' ? 'bg-purple-500/10 text-purple-400' : 'bg-blue-500/10 text-blue-400'}`}>
+                      {candidate.tipo}
+                    </span>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingCandidate(candidate);
+                        setIsModalOpen(true);
+                      }}
+                      className="text-slate-400 p-2 bg-slate-800 rounded-lg"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCandidateToDelete(candidate);
+                        setIsDeleteModalOpen(true);
+                      }}
+                      className="text-red-400 p-2 bg-red-500/10 rounded-lg"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </Card>
 
