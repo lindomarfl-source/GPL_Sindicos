@@ -179,11 +179,20 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
   };
 
   const exportPDF = async () => {
-    if (!candidate) return;
+    console.log('🚀 Iniciando exportação de PDF...');
+    if (!candidate) {
+      console.error('❌ Candidato não definido');
+      return;
+    }
     
-    showNotification('Gerando relatório PDF...', 'success');
-    
+    // Alerta visual de início
+    if (typeof showNotification === 'function') {
+      showNotification('Processando relatório... aguarde.', 'success');
+    }
+
     try {
+      console.log('📄 Criando instância do jsPDF');
+      const { jsPDF } = await import('jspdf');
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
