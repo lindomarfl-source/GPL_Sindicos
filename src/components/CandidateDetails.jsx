@@ -187,190 +187,117 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
     }
   };
 
-  const exportPDF = async () => {
-    console.log('🚀 Iniciando exportação de PDF...');
-    if (!candidate) {
-      console.error('❌ Candidato não definido');
-      return;
-    }
+  const exportPDF = () => {
+    if (!candidate) return;
     
-    // Alerta visual de início
-    if (typeof showNotification === 'function') {
-      showNotification('Processando relatório... aguarde.', 'success');
-    }
-
+    showNotification('Gerando arquivo PDF...', 'success');
+    
     try {
-      console.log('📄 Criando instância do jsPDF');
-      const { jsPDF } = await import('jspdf');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
+      // Usando importação direta para maior estabilidade em produção
+      const doc = new jsPDF({
+        orientation: 'p',
         unit: 'mm',
         format: 'a4'
       });
 
-      const blue = [59, 130, 246];
-      const darkBlue = [15, 23, 42];
-      const gray = [100, 116, 139];
-      const white = [255, 255, 255];
+      const primaryColor = [15, 23, 42];
+      const accentColor = [59, 130, 246];
 
-      // --- Header ---
-      pdf.setFillColor(...darkBlue);
-      pdf.rect(0, 0, 210, 40, 'F');
+      // 1. Cabeçalho Minimalista e Profissional
+      doc.setFillColor(...primaryColor);
+      doc.rect(0, 0, 210, 35, 'F');
       
-      pdf.setTextColor(...white);
-      pdf.setFontSize(22);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('RELATÓRIO DE QUALIFICAÇÃO TÉCNICA', 15, 20);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.text('GPL SÍNDICOS - RELATÓRIO TÉCNICO', 15, 20);
       
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text('CONDOMÍNIO GRAND PARK LINDÓIA - ELEIÇÃO SÍNDICO 2026', 15, 28);
-      pdf.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')}`, 155, 28);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text('RELATÓRIO GERADO PELO PORTAL DE SELEÇÃO OFICIAL', 15, 28);
+      doc.text(new Date().toLocaleString('pt-BR'), 160, 28);
 
-      let y = 55;
+      let currentY = 50;
 
-      // --- Perfil Principal ---
-      pdf.setTextColor(...darkBlue);
-      pdf.setFontSize(18);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text((candidate.nome || 'Candidato').toUpperCase(), 15, y);
-      y += 8;
+      // 2. Identificação
+      doc.setTextColor(...primaryColor);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text(String(candidate.nome || 'Candidato').toUpperCase(), 15, currentY);
       
-      pdf.setFontSize(11);
-      pdf.setTextColor(...gray);
-      pdf.text(`PERFIL: ${candidate.tipo === 'PJ' ? 'PESSOA JURÍDICA (ADMINISTRADORA)' : 'PESSOA FÍSICA (MORADOR)'}`, 15, y);
-      pdf.text(`STATUS: ${(candidate.status || 'Pendente').toUpperCase()}`, 130, y);
+      currentY += 10;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 116, 139);
+      doc.text(`TIPO: ${candidate.tipo === 'PJ' ? 'PESSOA JURIDICA' : 'PESSOA FISICA'}`, 15, currentY);
+      doc.text(`STATUS: ${String(candidate.status || 'PENDENTE').toUpperCase()}`, 110, currentY);
+
+      currentY += 15;
+
+      // 3. Resumo de Scores
+      doc.setDrawColor(200, 200, 200);
+      doc.setFillColor(245, 245, 245);
+      doc.rect(15, currentY, 180, 20, 'F');
       
-      y += 15;
-
-      // --- KPIs Box ---
-      pdf.setDrawColor(226, 232, 240);
-      pdf.setFillColor(248, 250, 252);
-      pdf.roundedRect(15, y, 180, 25, 3, 3, 'FD');
+      doc.setTextColor(...primaryColor);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PROGRESSO DOCUMENTAL:', 20, currentY + 12);
+      doc.text(`${Math.round(calculateProgress())}%`, 75, currentY + 12);
       
-      const progress = Math.round(calculateProgress() || 0);
-      const score = (Object.values(candidate.avaliacao || {}).reduce((a,b) => a+(Number(b)||0), 0) / 6).toFixed(1);
+      doc.text('SCORE TÉCNICO:', 110, currentY + 12);
+      const scoreValue = (Object.values(candidate.avaliacao || {}).reduce((a,b) => a+(Number(b)||0), 0) / 6).toFixed(1);
+      doc.text(`${scoreValue} / 5.0`, 145, currentY + 12);
 
-      pdf.setTextColor(...darkBlue);
-      pdf.setFontSize(9);
-      pdf.text('CONFORMIDADE DOCUMENTAL', 25, y + 10);
-      pdf.setFontSize(14);
-      pdf.text(`${progress}%`, 25, y + 18);
+      currentY += 35;
 
-      pdf.setFontSize(9);
-      pdf.text('SCORE TÉCNICO GERAL', 85, y + 10);
-      pdf.setFontSize(14);
-      pdf.text(`${score} / 5.0`, 85, y + 18);
+      // 4. Checklist de Documentos (Versão simplificada para não travar)
+      doc.setFontSize(12);
+      doc.text('ESTADO DA DOCUMENTAÇÃO', 15, currentY);
+      currentY += 8;
 
-      pdf.setFontSize(9);
-      pdf.text('ANÁLISE DE RISCO', 145, y + 10);
-      pdf.setFontSize(12);
-      pdf.setTextColor(candidate.risco === 'alto' ? [220, 38, 38] : [22, 163, 74]);
-      pdf.text((candidate.risco || 'BAIXO').toUpperCase(), 145, y + 18);
-
-      y += 40;
-
-      // --- Seção: Documentação ---
-      pdf.setTextColor(...darkBlue);
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('CHECKLIST DE DOCUMENTAÇÃO', 15, y);
-      y += 8;
-
-      pdf.setFontSize(9);
-      pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(...gray);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
       
-      const applicableDocs = (globalDocTypes || []).filter(doc => {
-        if (doc.category === 'Pessoa Jurídica' && candidate.tipo === 'PF') return false;
+      const docsToPrint = (globalDocTypes || []).filter(d => {
+        if (d.category === 'Pessoa Jurídica' && candidate.tipo === 'PF') return false;
         return true;
       });
 
-      applicableDocs.forEach((doc, index) => {
-        if (y > 270) { pdf.addPage(); y = 20; }
-        const status = (candidate.documentacao && candidate.documentacao[doc.key]) === 'entregue' ? 'CONCLUÍDO' : 'PENDENTE';
-        
-        pdf.setDrawColor(241, 245, 249);
-        pdf.line(15, y + 1, 195, y + 1);
-        
-        pdf.setTextColor(...darkBlue);
-        pdf.text(doc.label || 'Documento', 15, y);
-        
-        pdf.setTextColor(status === 'CONCLUÍDO' ? [22, 163, 74] : [234, 179, 8]);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text(status, 170, y, { align: 'right' });
-        pdf.setFont('helvetica', 'normal');
-        
-        y += 7;
+      docsToPrint.forEach((d) => {
+        if (currentY > 270) { doc.addPage(); currentY = 20; }
+        const status = (candidate.documentacao?.[d.key] === 'entregue') ? 'OK' : 'PENDENTE';
+        doc.setTextColor(100, 116, 139);
+        doc.text(String(d.label).substring(0, 80), 15, currentY);
+        doc.setTextColor(status === 'OK' ? [22, 163, 74] : [220, 38, 38]);
+        doc.text(status, 180, currentY, { align: 'right' });
+        currentY += 6;
       });
 
-      y += 15;
+      currentY += 15;
 
-      // --- Seção: Avaliação Técnica ---
-      if (y > 240) { pdf.addPage(); y = 20; }
-      pdf.setTextColor(...darkBlue);
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('AVALIAÇÃO DE COMPETÊNCIAS', 15, y);
-      y += 10;
+      // 5. Parecer Técnico
+      if (currentY > 230) { doc.addPage(); currentY = 20; }
+      doc.setTextColor(...primaryColor);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('PARECER DA COMISSÃO DE SELEÇÃO', 15, currentY);
+      currentY += 8;
 
-      const evalFields = [
-        { label: 'Comunicação', val: candidate.avaliacao?.comunicacao },
-        { label: 'Liderança', val: candidate.avaliacao?.lideranca },
-        { label: 'Técnica', val: candidate.avaliacao?.tecnica },
-        { label: 'Conflitos', val: candidate.avaliacao?.conflitos },
-        { label: 'Planejamento', val: candidate.avaliacao?.planejamento },
-        { label: 'Organização', val: candidate.avaliacao?.organizacao }
-      ];
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(51, 65, 85);
+      const textToSplit = String(localParecer || 'Nenhum parecer técnico registrado.');
+      const splitLines = doc.splitTextToSize(textToSplit, 180);
+      doc.text(splitLines, 15, currentY);
 
-      pdf.setFontSize(9);
-      evalFields.forEach(field => {
-        pdf.setTextColor(...darkBlue);
-        pdf.text(field.label, 15, y);
-        
-        pdf.setFillColor(241, 245, 249);
-        pdf.rect(60, y - 3, 100, 3, 'F');
-        pdf.setFillColor(...blue);
-        const barWidth = Math.min((field.val || 0) * 20, 100);
-        pdf.rect(60, y - 3, barWidth, 3, 'F');
-        
-        pdf.text(`${field.val || 0}`, 165, y);
-        y += 8;
-      });
-
-      y += 15;
-
-      // --- Seção: Parecer ---
-      if (y > 220) { pdf.addPage(); y = 20; }
-      pdf.setTextColor(...darkBlue);
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('PARECER TÉCNICO DA COMISSÃO', 15, y);
-      y += 8;
-
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(51, 65, 85);
-      
-      const sanitizedParecer = (localParecer || 'Nenhum parecer técnico registrado até o momento.').toString();
-      const lines = pdf.splitTextToSize(sanitizedParecer, 180);
-      pdf.text(lines, 15, y);
-
-      // --- Footer ---
-      const pageCount = pdf.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-          pdf.setPage(i);
-          pdf.setFontSize(8);
-          pdf.setTextColor(...gray);
-          pdf.text('Este documento é parte integrante do processo de auditoria de candidatos GCP.', 105, 285, { align: 'center' });
-          pdf.text(`Página ${i} de ${pageCount}`, 195, 285, { align: 'right' });
-      }
-
-      pdf.save(`Relatorio_Oficial_GPL_${candidate.nome.replace(/\s+/g, '_')}.pdf`);
+      // Finalização
+      const safeName = String(candidate.nome).replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      doc.save(`relatorio_${safeName}.pdf`);
       showNotification('Relatório baixado com sucesso!');
-    } catch (error) {
-      console.error('Erro na geração do PDF:', error);
-      showNotification('Erro ao gerar PDF. Verifique os dados.', 'error');
+      
+    } catch (err) {
+      console.error('Falha crítica no PDF:', err);
+      showNotification('Erro interno ao gerar o arquivo.', 'error');
     }
   };
 
