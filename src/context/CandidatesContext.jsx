@@ -120,10 +120,9 @@ export const CandidatesProvider = ({ children }) => {
       nome: candidate.nome,
       tipo: candidate.tipo,
       registro: candidate.registro,
-      responsavel: candidate.responsavel,
-      email: candidate.email,
-      telefone: candidate.telefone,
-      cidade: candidate.cidade || 'Porto Alegre',
+      responsavel: candidate.responsavel || '',
+      email: candidate.email || '',
+      telefone: candidate.telefone || '',
       status: candidate.status || 'Em análise',
       documentacao: candidate.documentacao || {},
       avaliacao: candidate.avaliacao || {
@@ -133,8 +132,8 @@ export const CandidatesProvider = ({ children }) => {
         vgv: '-', unidades: 0, torres: 0, complexidade: 'Não informada'
       },
       risco: candidate.risco || 'baixo',
-      parecer: '',
-      entrevista: {}
+      parecer: candidate.parecer || '',
+      entrevista: candidate.entrevista || {}
     };
 
     try {
