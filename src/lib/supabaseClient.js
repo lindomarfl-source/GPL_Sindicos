@@ -13,5 +13,8 @@ if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('SUA_URL_AQUI')) {
 
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co', 
-  supabaseAnonKey || 'placeholder-key'
+  supabaseAnonKey || 'placeholder-key',
+  {
+    db: { schema: 'sindico' }
+  }
 );
