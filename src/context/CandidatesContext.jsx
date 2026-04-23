@@ -41,17 +41,20 @@ export const CandidatesProvider = ({ children }) => {
   const [globalDocTypes, setGlobalDocTypes] = useState(defaultDocs);
   const [globalQuestions, setGlobalQuestions] = useState(defaultQuestions);
 
+  const [globalDocTypes, setGlobalDocTypes] = useState([]);
+  const [globalQuestions, setGlobalQuestions] = useState([]);
+
   // 1. Carregar dados do Supabase ao iniciar
   useEffect(() => {
     fetchCandidates();
+    fetchConfigs();
     
     // Opcional: Escutar mudanças em tempo real
     const subscription = supabase
-      .channel('candidatos_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'candidatos' }, (payload) => {
-        console.log('🔄 Mudança detectada no banco:', payload.eventType);
-        fetchCandidates();
-      })
+      .channel('portal_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'candidatos' }, fetchCandidates)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'config_perguntas' }, fetchConfigs)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'config_documentos' }, fetchConfigs)
       .subscribe();
 
     return () => {
@@ -59,24 +62,35 @@ export const CandidatesProvider = ({ children }) => {
     };
   }, []);
 
+  const fetchConfigs = async () => {
+    try {
+      // Carrega Documentos
+      const { data: docs, error: errDocs } = await supabase.from('config_documentos').select('*').order('created_at', { ascending: true });
+      if (errDocs) throw errDocs;
+      setGlobalDocTypes(docs?.length > 0 ? docs : defaultDocs);
+
+      // Carrega Perguntas
+      const { data: qst, error: errQst } = await supabase.from('config_perguntas').select('*').order('created_at', { ascending: true });
+      if (errQst) throw errQst;
+      setGlobalQuestions(qst?.length > 0 ? qst : defaultQuestions);
+    } catch (error) {
+      console.warn('Usando padrões locais. Tabelas de config ainda não criadas no Supabase.');
+      setGlobalDocTypes(defaultDocs);
+      setGlobalQuestions(defaultQuestions);
+    }
+  };
+
   const fetchCandidates = async () => {
     try {
-      setLoading(true);
-      console.log('📡 Iniciando busca de candidatos no Supabase...');
       const { data, error } = await supabase
         .from('candidatos')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('❌ Erro na busca do Supabase:', error.message);
-        throw error;
-      }
-      
-      console.log('✅ Busca finalizada. Candidatos encontrados:', data?.length || 0);
+      if (error) throw error;
       setCandidates(data || []);
     } catch (error) {
-      console.error('💥 Falha crítica no fetch:', error.message);
+      console.error('Falha no fetch de candidatos:', error.message);
     } finally {
       setLoading(false);
     }
@@ -102,37 +116,17 @@ export const CandidatesProvider = ({ children }) => {
   };
 
   const addCandidate = async (candidate) => {
-    const newCandidate = {
-      nome: candidate.nome,
-      tipo: candidate.tipo,
-      registro: candidate.registro,
-      responsavel: candidate.responsavel,
-      email: candidate.email,
-      status: 'Em análise',
-      documentacao: candidate.documentacao || {},
-      avaliacao: candidate.avaliacao || {
-        comunicacao: 0, lideranca: 0, tecnica: 0, conflitos: 0, planejamento: 0, organizacao: 0
-      },
-      experiencia: candidate.experiencia || {
-        vgv: '-', unidades: 0, torres: 0, complexidade: 'Não informada'
-      },
-      risco: candidate.risco || 'moderado',
-      parecer: '',
-      entrevista: {}
-    };
-
     try {
       const { data, error } = await supabase
         .from('candidatos')
-        .insert([newCandidate])
+        .insert([candidate])
         .select();
 
       if (error) throw error;
-      if (data && data.length > 0) {
-        setCandidates(prev => [data[0], ...prev]);
-      }
+      if (data) setCandidates(prev => [data[0], ...prev]);
+      showNotification('Candidato cadastrado com sucesso!');
     } catch (error) {
-      alert('Erro ao salvar no banco: ' + error.message);
+      alert('Erro ao salvar: ' + error.message);
     }
   };
 
@@ -159,9 +153,9 @@ export const CandidatesProvider = ({ children }) => {
 
       if (error) throw error;
       setCandidates(prev => prev.filter(c => c.id !== id));
-      showNotification(`Candidato "${name.toUpperCase()}" removido com sucesso!`, 'success');
+      showNotification(`Candidato "${name.toUpperCase()}" removido!`, 'success');
     } catch (error) {
-      showNotification('Erro ao excluir do banco', 'error');
+      showNotification('Erro ao excluir', 'error');
     }
   };
 
@@ -179,33 +173,41 @@ export const CandidatesProvider = ({ children }) => {
       globalQuestions,
       notification,
       showNotification,
-      resetGlobalDocTypes: () => {
+      resetGlobalDocTypes: async () => {
+        await supabase.from('config_documentos').delete().neq('key', 'null');
         setGlobalDocTypes(defaultDocs);
-        showNotification('Lista de documentos restaurada!');
+        showNotification('Lista restaurada!');
       },
-      addGlobalDocType: (doc) => {
-        setGlobalDocTypes([...globalDocTypes, doc]);
-        showNotification(`Novo requisito "${doc.label}" adicionado!`);
+      addGlobalDocType: async (doc) => {
+        const { data, error } = await supabase.from('config_documentos').insert([doc]).select();
+        if (!error && data) setGlobalDocTypes([...globalDocTypes, data[0]]);
+        showNotification(`Requisito "${doc.label}" adicionado!`);
       },
-      deleteGlobalDocType: (key, label = 'Requisito') => {
+      deleteGlobalDocType: async (key) => {
+        await supabase.from('config_documentos').delete().eq('key', key);
         setGlobalDocTypes(globalDocTypes.filter(d => d.key !== key));
-        showNotification(`Requisito "${label}" removido com sucesso!`, 'success');
+        showNotification(`Requisito removido!`, 'success');
       },
-      resetGlobalQuestions: () => {
+      resetGlobalQuestions: async () => {
+        await supabase.from('config_perguntas').delete().neq('key', 'null');
         setGlobalQuestions(defaultQuestions);
-        showNotification('Roteiro de entrevista restaurado!', 'success');
+        showNotification('Roteiro restaurado!', 'success');
       },
-      addGlobalQuestion: (q) => {
-        setGlobalQuestions([...globalQuestions, { ...q, key: Date.now().toString() }]);
-        showNotification('Nova pergunta adicionada ao roteiro!');
+      addGlobalQuestion: async (q) => {
+        const newQ = { ...q, key: Date.now().toString() };
+        const { data, error } = await supabase.from('config_perguntas').insert([newQ]).select();
+        if (!error && data) setGlobalQuestions([...globalQuestions, data[0]]);
+        showNotification('Pergunta adicionada!');
       },
-      updateGlobalQuestion: (key, updates) => {
+      updateGlobalQuestion: async (key, updates) => {
+        await supabase.from('config_perguntas').update(updates).eq('key', key);
         setGlobalQuestions(prev => prev.map(q => q.key === key ? { ...q, ...updates } : q));
         showNotification('Pergunta atualizada!');
       },
-      deleteGlobalQuestion: (key) => {
+      deleteGlobalQuestion: async (key) => {
+        await supabase.from('config_perguntas').delete().eq('key', key);
         setGlobalQuestions(prev => prev.filter(q => q.key !== key));
-        showNotification('Pergunta removida do roteiro.', 'warning');
+        showNotification('Pergunta removida.', 'warning');
       }
     }}>
       {children}
