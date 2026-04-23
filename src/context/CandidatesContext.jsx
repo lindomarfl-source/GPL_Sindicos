@@ -14,7 +14,9 @@ export const CandidatesProvider = ({ children }) => {
   const defaultDocs = [
     { key: 'curriculo', label: 'Currículo e Trajetória Profissional', category: 'Obrigatórios' },
     { key: 'experiencia', label: 'Comprovação de Experiência em Condomínios', category: 'Obrigatórios' },
-    { key: 'certidoes', label: 'Certidões Negativas (Cível, Criminal, Fiscal)', category: 'Obrigatórios' },
+    { key: 'certidao_civel', label: 'Certidão Negativa Cível', category: 'Obrigatórios' },
+    { key: 'certidao_criminal', label: 'Certidão Negativa Criminal', category: 'Obrigatórios' },
+    { key: 'certidao_fiscal', label: 'Certidão Negativa Fiscal (Federal/Estadual)', category: 'Obrigatórios' },
     { key: 'planoGestao', label: 'Plano de Gestão e Operação GPL', category: 'Obrigatórios' },
     { key: 'contratoSocial', label: 'Contrato Social / Estatuto', category: 'Pessoa Jurídica' },
     { key: 'certidoesPJ', label: 'Certidões Negativas da Empresa', category: 'Pessoa Jurídica' },
