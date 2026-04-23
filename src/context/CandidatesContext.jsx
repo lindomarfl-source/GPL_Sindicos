@@ -115,17 +115,39 @@ export const CandidatesProvider = ({ children }) => {
   };
 
   const addCandidate = async (candidate) => {
+    // Mapeamento explícito para garantir que registro e telefone sejam salvos
+    const payload = {
+      nome: candidate.nome,
+      tipo: candidate.tipo,
+      registro: candidate.registro,
+      responsavel: candidate.responsavel,
+      email: candidate.email,
+      telefone: candidate.telefone,
+      cidade: candidate.cidade || 'Porto Alegre',
+      status: candidate.status || 'Em análise',
+      documentacao: candidate.documentacao || {},
+      avaliacao: candidate.avaliacao || {
+        comunicacao: 0, lideranca: 0, tecnica: 0, conflitos: 0, planejamento: 0, organizacao: 0
+      },
+      experiencia: candidate.experiencia || {
+        vgv: '-', unidades: 0, torres: 0, complexidade: 'Não informada'
+      },
+      risco: candidate.risco || 'baixo',
+      parecer: '',
+      entrevista: {}
+    };
+
     try {
       const { data, error } = await supabase
         .from('candidatos')
-        .insert([candidate])
+        .insert([payload])
         .select();
 
       if (error) throw error;
       if (data) setCandidates(prev => [data[0], ...prev]);
       showNotification('Candidato cadastrado com sucesso!');
     } catch (error) {
-      alert('Erro ao salvar: ' + error.message);
+      alert('Erro ao salvar no banco: ' + error.message);
     }
   };
 

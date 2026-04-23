@@ -59,17 +59,10 @@ export const CandidateModal = ({ isOpen, onClose, onSave, initialData = null }) 
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const candidateData = initialData 
-      ? { ...initialData, ...formData }
-      : {
-          ...formData,
-          status: 'Em análise',
-          documentacao: {},
-          avaliacao: {
-            comunicacao: 0, lideranca: 0, tecnica: 0, 
-            conflitos: 0, planejamento: 0, organizacao: 0
-          }
-        };
+    const candidateData = {
+      ...initialData,
+      ...formData
+    };
     
     onSave(candidateData);
     onClose();
