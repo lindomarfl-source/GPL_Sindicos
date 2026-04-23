@@ -43,9 +43,6 @@ export const CandidatesProvider = ({ children }) => {
   const [globalDocTypes, setGlobalDocTypes] = useState(defaultDocs);
   const [globalQuestions, setGlobalQuestions] = useState(defaultQuestions);
 
-  const [globalDocTypes, setGlobalDocTypes] = useState([]);
-  const [globalQuestions, setGlobalQuestions] = useState([]);
-
   // 1. Carregar dados do Supabase ao iniciar
   useEffect(() => {
     fetchCandidates();
