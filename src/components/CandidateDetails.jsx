@@ -322,11 +322,13 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
     }
   };
 
-  const calculateProgress = () => {
+  // Cálculo reativo de progresso (Monitora mudanças no candidato e nos tipos globais)
+  const progress = React.useMemo(() => {
     if (!candidate || !globalDocTypes || globalDocTypes.length === 0) return 0;
     
     // 1. Identifica quais documentos são REALMENTE exigidos deste candidato
     const requiredDocs = globalDocTypes.filter(doc => {
+      // Regra de PF/PJ: Se for documento exclusivo de PJ e o candidato for PF, ignora.
       if (doc.category === 'Pessoa Jurídica' && candidate.tipo === 'PF') return false;
       return true;
     });
@@ -335,22 +337,22 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
 
     // 2. Conta apenas os exigidos que estão marcados como 'entregue'
     const docData = candidate.documentacao || {};
-    const deliveredCount = requiredDocs.filter(doc => docData[doc.key] === 'entregue').length;
+    const deliveredCount = requiredDocs.filter(doc => (docData[doc.key] || '').toLowerCase() === 'entregue').length;
     
     // 3. Cálculo final
     const rawProgress = (deliveredCount / requiredDocs.length) * 100;
-    
     return Math.min(Math.max(rawProgress, 0), 100);
-  };
+  }, [candidate, globalDocTypes]);
 
-  const calculateTechScore = () => {
+  // Cálculo reativo de score técnico
+  const techScore = React.useMemo(() => {
     if (!candidate || !candidate.avaliacao) return 0;
     const evalData = candidate.avaliacao;
     const values = Object.values(evalData);
     if (values.length === 0) return 0;
     const total = values.reduce((a, b) => a + (Number(b) || 0), 0);
-    return (total / 30) * 100;
-  };
+    return Math.min((total / 30) * 100, 100);
+  }, [candidate]);
 
   const DocList = ({ title, items }) => (
     <div className="space-y-3">
@@ -417,8 +419,8 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
                   <span className="text-sm font-bold uppercase">{(candidate.risco || 'baixo')} RISCO</span>
                 </div>
               </div>
-              <ProgressBar value={calculateProgress()} label="Progresso Documental" />
-              <ProgressBar value={calculateTechScore()} label="Score Técnico" />
+              <ProgressBar value={progress} label="Progresso Documental" />
+              <ProgressBar value={techScore} label="Score Técnico" />
             </div>
           </Card>
 
