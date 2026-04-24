@@ -51,9 +51,9 @@ export const CandidatesProvider = ({ children }) => {
     // Opcional: Escutar mudanças em tempo real
     const subscription = supabase
       .channel('portal_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'candidatos' }, fetchCandidates)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'config_perguntas' }, fetchConfigs)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'config_documentos' }, fetchConfigs)
+      .on('postgres_changes', { event: '*', schema: 'sindico', table: 'cadastro' }, fetchCandidates)
+      .on('postgres_changes', { event: '*', schema: 'sindico', table: 'config_perguntas' }, fetchConfigs)
+      .on('postgres_changes', { event: '*', schema: 'sindico', table: 'config_documentos' }, fetchConfigs)
       .subscribe();
 
     return () => {
@@ -65,15 +65,21 @@ export const CandidatesProvider = ({ children }) => {
     try {
       // Carrega Documentos
       const { data: docs, error: errDocs } = await supabase.from('config_documentos').select('*').order('created_at', { ascending: true });
-      if (errDocs) throw errDocs;
+      if (errDocs) {
+        console.error('❌ Erro Supabase (Docs):', errDocs.message, errDocs);
+        throw errDocs;
+      }
       setGlobalDocTypes(docs?.length > 0 ? docs : defaultDocs);
 
       // Carrega Perguntas
       const { data: qst, error: errQst } = await supabase.from('config_perguntas').select('*').order('created_at', { ascending: true });
-      if (errQst) throw errQst;
+      if (errQst) {
+        console.error('❌ Erro Supabase (Perguntas):', errQst.message, errQst);
+        throw errQst;
+      }
       setGlobalQuestions(qst?.length > 0 ? qst : defaultQuestions);
     } catch (error) {
-      console.warn('Usando padrões locais. Tabelas de config ainda não criadas no Supabase.');
+      console.warn('⚠️ Fallback: Usando padrões locais. Motivo:', error.message || error);
       setGlobalDocTypes(defaultDocs);
       setGlobalQuestions(defaultQuestions);
     }
@@ -82,11 +88,14 @@ export const CandidatesProvider = ({ children }) => {
   const fetchCandidates = async () => {
     try {
       const { data, error } = await supabase
-        .from('candidatos')
+        .from('cadastro')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro Supabase (Fetch cadastro):', error);
+        throw error;
+      }
       setCandidates(data || []);
     } catch (error) {
       console.error('Falha no fetch de candidatos:', error.message);
@@ -138,7 +147,7 @@ export const CandidatesProvider = ({ children }) => {
 
     try {
       const { data, error } = await supabase
-        .from('candidatos')
+        .from('cadastro')
         .insert([payload])
         .select();
 
@@ -152,22 +161,36 @@ export const CandidatesProvider = ({ children }) => {
 
   const updateCandidate = async (id, updates) => {
     try {
+      // Atualização imediata no estado local (Otimista)
+      setCandidates(prev => prev.map(c => {
+        if (c.id === id) {
+          // Garante que se estivermos atualizando documentação, a gente mescle as chaves
+          const newDoc = updates.documentacao ? { ...c.documentacao, ...updates.documentacao } : c.documentacao;
+          const newEval = updates.avaliacao ? { ...c.avaliacao, ...updates.avaliacao } : c.avaliacao;
+          const newExp = updates.experiencia ? { ...c.experiencia, ...updates.experiencia } : c.experiencia;
+          
+          return { ...c, ...updates, documentacao: newDoc, avaliacao: newEval, experiencia: newExp };
+        }
+        return c;
+      }));
+
       const { error } = await supabase
-        .from('candidatos')
+        .from('cadastro')
         .update(updates)
         .eq('id', id);
 
       if (error) throw error;
-      setCandidates(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
     } catch (error) {
       console.error('Erro ao atualizar:', error.message);
+      // Opcional: Reverter estado em caso de erro
+      fetchCandidates(); 
     }
   };
 
   const deleteCandidate = async (id, name = 'Candidato') => {
     try {
       const { error } = await supabase
-        .from('candidatos')
+        .from('cadastro')
         .delete()
         .eq('id', id);
 
