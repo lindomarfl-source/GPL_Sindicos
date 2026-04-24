@@ -18,6 +18,7 @@ export const QuestionsManager = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingKey, setEditingKey] = useState(null);
   const [formData, setFormData] = useState({ q: '', d: '' });
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const handleSave = () => {
     if (!formData.q) return;
@@ -40,6 +41,36 @@ export const QuestionsManager = () => {
 
   return (
     <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+      {/* Modal de Confirmação de Deleção */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)}></div>
+          <Card className="relative w-full max-w-sm bg-slate-900 border-red-500/30 p-6 text-center space-y-6 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto text-red-500">
+              <Trash2 size={32} />
+            </div>
+            <div>
+              <h4 className="text-white font-bold text-lg">Remover Pergunta?</h4>
+              <p className="text-slate-400 text-sm mt-2">
+                Tem certeza que deseja excluir esta pergunta do roteiro? Esta ação não pode ser desfeita.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="secondary" className="flex-1" onClick={() => setDeleteConfirm(null)}>Cancelar</Button>
+              <Button 
+                className="flex-1 bg-red-600 hover:bg-red-500" 
+                onClick={() => {
+                  deleteGlobalQuestion(deleteConfirm.key);
+                  setDeleteConfirm(null);
+                }}
+              >
+                Sim, Excluir
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-900/40 p-5 rounded-2xl border border-slate-800">
         <div>
           <h3 className="text-xl font-black text-white flex items-center gap-3 italic">
@@ -126,7 +157,7 @@ export const QuestionsManager = () => {
                   <Edit3 size={16} />
                 </button>
                 <button 
-                  onClick={() => window.confirm('Remover esta pergunta?') && deleteGlobalQuestion(item.key)}
+                  onClick={() => setDeleteConfirm(item)}
                   className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                   title="Excluir"
                 >

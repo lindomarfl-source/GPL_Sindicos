@@ -14,36 +14,29 @@ import { DeleteConfirmModal } from './DeleteConfirmModal';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-const ProgressBar = ({ value, label, total, current }) => {
-  const percentage = Math.round(value || 0);
-  const isComplete = percentage >= 100;
+const ComplianceStatus = ({ label, total, current }) => {
+  const isComplete = current >= total && total > 0;
+  const isStarted = current > 0;
   
   return (
-    <div className="space-y-2 mb-4">
-      <div className="flex justify-between items-end">
-        <div>
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{label}</p>
-          <p className="text-lg font-black text-white italic tracking-tighter">
-            {percentage}% 
-            {(total > 0) && (
-              <span className="text-[10px] text-slate-500 ml-2 not-italic font-medium">
-                ({current || 0} de {total})
-              </span>
-            )}
-          </p>
-        </div>
-        {isComplete && <div className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold animate-pulse">COMPLETO</div>}
+    <div className="space-y-3 mb-6 p-4 bg-slate-900/50 rounded-2xl border border-slate-800">
+      <div className="flex justify-between items-center">
+        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{label}</p>
+        <div className={`w-3 h-3 rounded-full animate-pulse ${
+          isComplete ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 
+          isStarted ? 'bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]' : 
+          'bg-red-500'
+        }`} />
       </div>
-      <div className="h-3 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800 p-0.5 shadow-inner">
-        <div 
-          className={`h-full rounded-full transition-all duration-700 ease-out shadow-[0_0_15px_rgba(59,130,246,0.3)] ${
-            isComplete 
-              ? 'bg-gradient-to-r from-green-500 to-emerald-400 shadow-green-500/20' 
-              : 'bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-400'
-          }`}
-          style={{ width: `${percentage}%` }}
-        />
+      <div className="flex items-baseline gap-2">
+        <span className="text-3xl font-black text-white tracking-tighter">{current || 0}</span>
+        <span className="text-slate-500 font-bold uppercase text-xs">de {total || 0} documentos</span>
       </div>
+      <p className="text-[10px] font-medium text-slate-500 italic">
+        {isComplete ? '✅ Documentação devidamente verificada e completa.' : 
+         isStarted ? '⚠️ Em fase de coleta e conferência documental.' : 
+         '❌ Nenhuma documentação foi entregue até o momento.'}
+      </p>
     </div>
   );
 };
@@ -443,13 +436,19 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
                   <span className="text-sm font-bold uppercase">{(candidate.risco || 'baixo')} RISCO</span>
                 </div>
               </div>
-              <ProgressBar 
-                value={progress} 
-                label="Progresso Documental" 
+              <ComplianceStatus 
+                label="Checklist Documental" 
                 total={globalDocTypes?.filter(d => !(d.category === 'Pessoa Jurídica' && candidate.tipo === 'PF')).length}
                 current={Object.values(candidate.documentacao || {}).filter(v => v === 'entregue').length}
               />
-              <ProgressBar value={techScore} label="Score Técnico" />
+              
+              <div className="p-4 bg-slate-900/50 rounded-2xl border border-slate-800 space-y-2">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Avaliação Técnica</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-blue-500 tracking-tighter">{Math.round(techScore || 0)}</span>
+                  <span className="text-slate-500 font-bold uppercase text-xs">Pontos / 100</span>
+                </div>
+              </div>
             </div>
           </Card>
 
