@@ -124,7 +124,7 @@ export const CandidatesProvider = ({ children }) => {
   };
 
   const addCandidate = async (candidate) => {
-    // Mapeamento explícito para garantir que registro e telefone sejam salvos
+    // Mapeamento EXPLICITO e COMPLETO de todos os campos do formulário
     const payload = {
       nome: candidate.nome,
       tipo: candidate.tipo,
@@ -132,7 +132,10 @@ export const CandidatesProvider = ({ children }) => {
       responsavel: candidate.responsavel || '',
       email: candidate.email || '',
       telefone: candidate.telefone || '',
+      cidade: candidate.cidade || 'Porto Alegre',
       status: candidate.status || 'Em análise',
+      risco: candidate.risco || 'baixo',
+      parecer: candidate.parecer || '',
       documentacao: candidate.documentacao || {},
       avaliacao: candidate.avaliacao || {
         comunicacao: 0, lideranca: 0, tecnica: 0, conflitos: 0, planejamento: 0, organizacao: 0
@@ -140,8 +143,6 @@ export const CandidatesProvider = ({ children }) => {
       experiencia: candidate.experiencia || {
         vgv: '-', unidades: 0, torres: 0, complexidade: 'Não informada'
       },
-      risco: candidate.risco || 'baixo',
-      parecer: candidate.parecer || '',
       entrevista: candidate.entrevista || {}
     };
 
@@ -151,11 +152,14 @@ export const CandidatesProvider = ({ children }) => {
         .insert([payload])
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro Supabase (Insert cadastro):', error);
+        throw error;
+      }
       if (data) setCandidates(prev => [data[0], ...prev]);
       showNotification('Candidato cadastrado com sucesso!');
     } catch (error) {
-      alert('Erro ao salvar no banco: ' + error.message);
+      alert('Erro ao salvar no banco: ' + (error.message || 'Erro desconhecido'));
     }
   };
 

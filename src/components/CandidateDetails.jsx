@@ -14,20 +14,39 @@ import { DeleteConfirmModal } from './DeleteConfirmModal';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-const ProgressBar = ({ value, label }) => (
-  <div className="mb-4">
-    <div className="flex justify-between text-sm mb-1">
-      <span className="text-slate-400">{label}</span>
-      <span className="text-blue-400 font-bold">{Math.round(value || 0)}%</span>
+const ProgressBar = ({ value, label, total, current }) => {
+  const percentage = Math.round(value || 0);
+  const isComplete = percentage >= 100;
+  
+  return (
+    <div className="space-y-2 mb-4">
+      <div className="flex justify-between items-end">
+        <div>
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{label}</p>
+          <p className="text-lg font-black text-white italic tracking-tighter">
+            {percentage}% 
+            {(total > 0) && (
+              <span className="text-[10px] text-slate-500 ml-2 not-italic font-medium">
+                ({current || 0} de {total})
+              </span>
+            )}
+          </p>
+        </div>
+        {isComplete && <div className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold animate-pulse">COMPLETO</div>}
+      </div>
+      <div className="h-3 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800 p-0.5 shadow-inner">
+        <div 
+          className={`h-full rounded-full transition-all duration-700 ease-out shadow-[0_0_15px_rgba(59,130,246,0.3)] ${
+            isComplete 
+              ? 'bg-gradient-to-r from-green-500 to-emerald-400 shadow-green-500/20' 
+              : 'bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-400'
+          }`}
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
     </div>
-    <div className="w-full bg-slate-700 rounded-full h-2">
-      <div 
-        className="bg-blue-600 h-2 rounded-full transition-all duration-500" 
-        style={{ width: `${value || 0}%` }}
-      ></div>
-    </div>
-  </div>
-);
+  );
+};
 
 const DocumentItem = ({ label, status, onToggle, onDelete }) => {
   const statusConfig = {
@@ -124,7 +143,10 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
   const [localParecer, setLocalParecer] = useState('');
   const reportRef = useRef();
   
-  const candidate = candidates?.find(c => c.id === candidateId);
+  // REATIVIDADE CRÍTICA: Garante que o componente pegue sempre a versão mais nova do objeto candidato
+  const candidate = React.useMemo(() => {
+    return (candidates || []).find(c => c.id === candidateId);
+  }, [candidates, candidateId]);
   
   React.useEffect(() => {
     if (candidate) {
@@ -136,7 +158,7 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
   if (!candidate) return <div className="p-20 text-center text-slate-500 font-bold uppercase tracking-widest">Candidato não localizado na base de dados.</div>;
 
   const toggleDoc = (key) => {
-    const docData = candidate.documentacao || {};
+    const docData = { ...(candidate.documentacao || {}) };
     const currentStatus = docData[key] || 'não entregue';
     const nextStatus = currentStatus === 'entregue' ? 'pendente' : 
                        currentStatus === 'pendente' ? 'não entregue' : 'entregue';
@@ -147,7 +169,7 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
   };
 
   const updateExperience = (key, val) => {
-    const expData = candidate.experiencia || {};
+    const expData = { ...(candidate.experiencia || {}) };
     updateCandidate(candidate.id, {
       experiencia: { ...expData, [key]: val }
     });
@@ -324,11 +346,11 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
 
   // Cálculo reativo de progresso (Monitora mudanças no candidato e nos tipos globais)
   const progress = React.useMemo(() => {
+    console.log('📊 RECALCULANDO PROGRESSO PARA:', candidate?.nome);
     if (!candidate || !globalDocTypes || globalDocTypes.length === 0) return 0;
     
     // 1. Identifica quais documentos são REALMENTE exigidos deste candidato
     const requiredDocs = globalDocTypes.filter(doc => {
-      // Regra de PF/PJ: Se for documento exclusivo de PJ e o candidato for PF, ignora.
       if (doc.category === 'Pessoa Jurídica' && candidate.tipo === 'PF') return false;
       return true;
     });
@@ -341,6 +363,8 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
     
     // 3. Cálculo final
     const rawProgress = (deliveredCount / requiredDocs.length) * 100;
+    console.log(`✅ Progresso: ${deliveredCount} de ${requiredDocs.length} = ${rawProgress}%`);
+    
     return Math.min(Math.max(rawProgress, 0), 100);
   }, [candidate, globalDocTypes]);
 
@@ -419,7 +443,12 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
                   <span className="text-sm font-bold uppercase">{(candidate.risco || 'baixo')} RISCO</span>
                 </div>
               </div>
-              <ProgressBar value={progress} label="Progresso Documental" />
+              <ProgressBar 
+                value={progress} 
+                label="Progresso Documental" 
+                total={globalDocTypes?.filter(d => !(d.category === 'Pessoa Jurídica' && candidate.tipo === 'PF')).length}
+                current={Object.values(candidate.documentacao || {}).filter(v => v === 'entregue').length}
+              />
               <ProgressBar value={techScore} label="Score Técnico" />
             </div>
           </Card>

@@ -59,11 +59,23 @@ export const CandidateModal = ({ isOpen, onClose, onSave, initialData = null }) 
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Garantindo que TODOS os campos do formulário sejam enviados
     const candidateData = {
-      ...initialData,
-      ...formData
+      ...initialData, // Preserva campos técnicos (documentacao, id, etc)
+      nome: formData.nome,
+      tipo: formData.tipo,
+      registro: formData.registro,
+      responsavel: formData.responsavel,
+      email: formData.email,
+      telefone: formData.telefone,
+      cidade: formData.cidade,
+      status: formData.status || initialData?.status || 'Em análise',
+      risco: formData.risco || initialData?.risco || 'baixo',
+      parecer: formData.parecer || initialData?.parecer || ''
     };
     
+    console.log('📝 Enviando dados consolidadaos para salvar:', candidateData);
     onSave(candidateData);
     onClose();
   };
@@ -128,6 +140,26 @@ export const CandidateModal = ({ isOpen, onClose, onSave, initialData = null }) 
               <InputField label="E-mail" name="email" type="email" value={formData.email} onChange={handleChange} icon={Mail} placeholder="contato@email.com" />
               <InputField label="Telefone / WhatsApp" name="telefone" value={formData.telefone} onChange={handleChange} icon={Phone} placeholder="(51) 99999-9999" />
               
+              <div className="md:col-span-2 space-y-3">
+                <label className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-widest">Análise de Risco Inicial</label>
+                <div className="flex gap-2">
+                  {['baixo', 'moderado', 'alto'].map(level => (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, risco: level }))}
+                      className={`flex-1 py-2 px-3 rounded-lg border text-[10px] font-black uppercase transition-all ${
+                        formData.risco === level 
+                          ? (level === 'baixo' ? 'bg-green-600 border-green-500 text-white' : level === 'moderado' ? 'bg-yellow-600 border-yellow-500 text-white' : 'bg-red-600 border-red-500 text-white')
+                          : 'bg-slate-900 border-slate-700 text-slate-500'
+                      }`}
+                    >
+                      {level}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="md:col-span-2">
                 <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} icon={MapPin} placeholder="Porto Alegre" />
               </div>
