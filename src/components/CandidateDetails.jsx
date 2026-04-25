@@ -504,7 +504,7 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
               <button onClick={() => setActiveSubTab('info')} className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all ${activeSubTab === 'info' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><User size={16} /> <span className="text-xs font-bold uppercase tracking-tighter">Dados</span></button>
               <button onClick={() => setActiveSubTab('docs')} className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all ${activeSubTab === 'docs' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><FileCheck size={16} /> <span className="text-xs font-bold uppercase tracking-tighter">Docs</span></button>
               <button onClick={() => setActiveSubTab('tech')} className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all ${activeSubTab === 'tech' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><Star size={16} /> <span className="text-xs font-bold uppercase tracking-tighter">Técnico</span></button>
-              <button onClick={() => setActiveSubTab('interview')} className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all ${activeSubTab === 'interview' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><Mic size={16} /> <span className="text-xs font-bold uppercase tracking-tighter">Apoio</span></button>
+              <button onClick={() => setActiveSubTab('interview')} className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all ${activeSubTab === 'interview' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><Mic size={16} /> <span className="text-xs font-bold uppercase tracking-tighter">Questionário</span></button>
             </div>
           </div>
 
@@ -686,14 +686,15 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
                 </div>
               </div>
             )}
+
             {activeSubTab === 'interview' && (
               <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-300 pb-10">
                 <div className="flex justify-between items-center mb-2">
                   <h4 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
                     <Mic size={18} className="text-red-500" />
-                    Interview Lab: Sabatina de Candidatos
+                    Resposta do Questionário Técnico
                   </h4>
-                  <Badge status="Em análise">Protocolo GCP (Gestão, Confiança, Prontidão)</Badge>
+                  <Badge status="Em análise">Protocolo GCP</Badge>
                 </div>
 
                 <div className="space-y-4">
@@ -710,31 +711,22 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
                               <p className="text-[10px] text-slate-500 font-medium italic mt-1">{item.d}</p>
                             </div>
                           </div>
-                          
-                          <div className="flex gap-1 p-1 bg-slate-950 rounded-lg shrink-0">
-                            <button 
-                              onClick={() => updateInterview(item.key, 'status', 'convinced')}
-                              className={`p-1.5 rounded-md transition-all ${ (candidate.entrevista?.[item.key]?.status === 'convinced') ? 'bg-green-500/20 text-green-400 shadow-lg shadow-green-900/10' : 'text-slate-600 hover:text-slate-400' }`}
-                              title="Convincente"
-                            >
-                              <Check size={16} />
-                            </button>
-                            <button 
-                              onClick={() => updateInterview(item.key, 'status', 'doubtful')}
-                              className={`p-1.5 rounded-md transition-all ${ (candidate.entrevista?.[item.key]?.status === 'doubtful') ? 'bg-red-500/20 text-red-400 shadow-lg shadow-red-900/10' : 'text-slate-600 hover:text-slate-400' }`}
-                              title="Dubitativo"
-                            >
-                              <X size={16} />
-                            </button>
-                          </div>
                         </div>
 
-                        <textarea 
-                          className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 focus:ring-1 focus:ring-blue-500 outline-none h-24 transition-all resize-none"
-                          placeholder="Digite aqui os pontos principais da resposta do candidato..."
-                          value={candidate.entrevista?.[item.key]?.answer || ''}
-                          onChange={(e) => updateInterview(item.key, 'answer', e.target.value)}
-                        />
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Resposta do Candidato</label>
+                          <textarea 
+                            className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-4 text-sm text-slate-300 focus:ring-1 focus:ring-blue-500 outline-none h-40 transition-all resize-none"
+                            placeholder="Registre aqui os detalhes da resposta dada pelo síndico durante a sabatina..."
+                            value={candidate.entrevista?.[item.key] || ''}
+                            onChange={(e) => {
+                              const interviewData = { ...(candidate.entrevista || {}) };
+                              updateCandidate(candidate.id, {
+                                entrevista: { ...interviewData, [item.key]: e.target.value }
+                              });
+                            }}
+                          />
+                        </div>
                       </div>
                     </Card>
                   ))}

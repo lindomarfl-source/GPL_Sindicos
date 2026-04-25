@@ -5,9 +5,10 @@ import { ShieldLogo, Button } from './components/Common';
 import { Dashboard } from './components/Dashboard';
 import { CandidateManager } from './components/CandidateManager';
 import { CandidateDetails } from './components/CandidateDetails';
-import { ComparisonView } from './components/ComparisonView';
+import { DocumentComparator } from './components/DocumentComparator';
 import { QuestionsManager } from './components/QuestionsManager';
-import { LayoutDashboard, Users, BarChart2, LogOut, CheckCircle2, AlertCircle, X, Mic } from 'lucide-react';
+import { ComparisonView } from './components/ComparisonView';
+import { LayoutDashboard, Users, BarChart2, LogOut, CheckCircle2, AlertCircle, X, Mic, Swords } from 'lucide-react';
 
 const Toast = ({ notification }) => {
   if (!notification) return null;
@@ -77,7 +78,8 @@ const App = () => {
           <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
           <NavItem id="candidatos" icon={Users} label="Candidatos" />
           <NavItem id="comparativo" icon={BarChart2} label="Comparativo" />
-          <NavItem id="roteiro" icon={Mic} label="Roteiro" />
+          <NavItem id="batalha" icon={Swords} label="Batalha" />
+          <NavItem id="roteiro" icon={Mic} label="Questionário" />
         </nav>
 
         <div className="pt-6 border-t border-slate-800">
@@ -99,7 +101,7 @@ const App = () => {
               {activeTab === 'dashboard' ? 'Dashboard' : 
                activeTab === 'candidatos' ? 'Candidatos' : 
                activeTab === 'comparativo' ? 'Comparativo' : 
-               activeTab === 'roteiro' ? 'Roteiro Técnico' : 
+               activeTab === 'roteiro' ? 'Questionário Técnico' : 
                activeTab === 'detalhes' ? 'Ficha Técnica' : 'Portal GPL'}
             </h2>
             <p className="text-[10px] md:text-sm text-slate-500 mt-0.5 font-bold uppercase tracking-widest">
@@ -117,8 +119,8 @@ const App = () => {
         
         {activeTab === 'candidatos' && <CandidateManager onSelectCandidate={(id) => { setSelectedCandidateId(id); setActiveTab('detalhes'); }} />}
 
-        {activeTab === 'comparativo' && <ComparisonView />}
-
+        {activeTab === 'comparativo' && <DocumentComparator />}
+        {activeTab === 'batalha' && <ComparisonView />}
         {activeTab === 'roteiro' && <QuestionsManager />}
 
         {activeTab === 'detalhes' && (
@@ -132,9 +134,9 @@ const App = () => {
       {/* Bottom Navigation Mobile */}
       <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 px-4 py-3 flex lg:hidden z-50 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         <BottomNavItem id="dashboard" icon={LayoutDashboard} label="Home" />
-        <BottomNavItem id="candidatos" icon={Users} label="Candidatos" />
-        <BottomNavItem id="roteiro" icon={Mic} label="Roteiro" />
-        <BottomNavItem id="comparativo" icon={BarChart2} label="Análise" />
+        <BottomNavItem id="candidatos" icon={Users} label="Lista" />
+        <BottomNavItem id="comparativo" icon={BarChart2} label="Matriz" />
+        <BottomNavItem id="batalha" icon={Swords} label="Batalha" />
         <button 
           onClick={logout}
           className="flex flex-col items-center justify-center gap-1 flex-1 py-1 text-slate-500"

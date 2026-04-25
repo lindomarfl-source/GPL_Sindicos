@@ -21,7 +21,7 @@ const InputField = ({ label, icon: Icon, name, type = "text", placeholder, value
 );
 
 export const CandidateModal = ({ isOpen, onClose, onSave, initialData = null }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(initialData || {
     nome: '',
     tipo: 'PF',
     registro: '',
@@ -29,8 +29,18 @@ export const CandidateModal = ({ isOpen, onClose, onSave, initialData = null }) 
     email: '',
     telefone: '',
     cidade: 'Porto Alegre',
-    parecer: ''
+    risco: 'baixo',
+    observacao: ''
   });
+
+  const formatDocument = (val, type) => {
+    const raw = val.replace(/\D/g, '');
+    if (type === 'PF') {
+      return raw.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").substring(0, 14);
+    } else {
+      return raw.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5").substring(0, 18);
+    }
+  };
 
   // Sincroniza o estado com initialData quando o modal abre
   React.useEffect(() => {
@@ -133,35 +143,46 @@ export const CandidateModal = ({ isOpen, onClose, onSave, initialData = null }) 
               <div className="md:col-span-2">
                 <InputField label="Nome / Razão Social" name="nome" value={formData.nome} onChange={handleChange} icon={ShieldCheck} placeholder="Ex: Alpha Gestão Condominial" />
               </div>
-
-              <InputField label={formData.tipo === 'PF' ? "CPF" : "CNPJ"} name="registro" value={formData.registro} onChange={handleChange} icon={Hash} placeholder="000.000.000-00" />
-              <InputField label="Responsável" name="responsavel" value={formData.responsavel} onChange={handleChange} icon={User} placeholder="Nome do representante" />
-              
-              <InputField label="E-mail" name="email" type="email" value={formData.email} onChange={handleChange} icon={Mail} placeholder="contato@email.com" />
-              <InputField label="Telefone / WhatsApp" name="telefone" value={formData.telefone} onChange={handleChange} icon={Phone} placeholder="(51) 99999-9999" />
-              
-              <div className="md:col-span-2 space-y-3">
-                <label className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-widest">Análise de Risco Inicial</label>
-                <div className="flex gap-2">
-                  {['baixo', 'moderado', 'alto'].map(level => (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, risco: level }))}
-                      className={`flex-1 py-2 px-3 rounded-lg border text-[10px] font-black uppercase transition-all ${
-                        formData.risco === level 
-                          ? (level === 'baixo' ? 'bg-green-600 border-green-500 text-white' : level === 'moderado' ? 'bg-yellow-600 border-yellow-500 text-white' : 'bg-red-600 border-red-500 text-white')
-                          : 'bg-slate-900 border-slate-700 text-slate-500'
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  ))}
-                </div>
+              <div className="md:col-span-2">
+                <InputField 
+                  label="CPF / CNPJ" 
+                  name="registro" 
+                  value={formData.registro} 
+                  onChange={handleChange} 
+                  icon={ShieldCheck} 
+                  placeholder={formData.tipo === 'PF' ? '000.000.000-00' : '00.000.000/0000-00'} 
+                />
               </div>
 
               <div className="md:col-span-2">
+                <InputField 
+                  label={formData.tipo === 'PF' ? 'Nome para Contato' : 'Nome do Responsável Técnico'} 
+                  name="responsavel" 
+                  value={formData.responsavel} 
+                  onChange={handleChange} 
+                  icon={User} 
+                  placeholder="Nome completo do responsável" 
+                />
+              </div>
+
+              <InputField label="E-mail" name="email" type="email" value={formData.email} onChange={handleChange} icon={Mail} placeholder="contato@email.com" />
+              <InputField label="Telefone / WhatsApp" name="telefone" value={formData.telefone} onChange={handleChange} icon={Phone} placeholder="(51) 99999-9999" />
+              
+              <div className="md:col-span-2">
                 <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} icon={MapPin} placeholder="Porto Alegre" />
+              </div>
+
+              <div className="md:col-span-2 space-y-1.5">
+                <label className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                  <MessageSquare size={14} /> Observações Iniciais
+                </label>
+                <textarea 
+                  name="observacao"
+                  value={formData.observacao}
+                  onChange={handleChange}
+                  className="w-full bg-slate-900/50 border border-slate-800 rounded-xl p-3 text-xs text-white focus:ring-1 focus:ring-blue-500 outline-none h-24 resize-none"
+                  placeholder="Notas rápidas sobre o candidato..."
+                />
               </div>
 
               {/* Espaçador para o teclado mobile não cobrir o último campo */}
