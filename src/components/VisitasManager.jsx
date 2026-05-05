@@ -445,8 +445,9 @@ export const VisitasManager = () => {
         ) : (
           <div className="space-y-10 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-blue-500/20 before:via-slate-700/30 before:to-transparent">
             {Object.keys(groupedVisitas).sort().map(data => {
-              // Formatar a data (ex: 15 de Abril)
-              const dataObj = new Date(data + 'T00:00:00');
+              // Formatar a data para evitar bugs de fuso horário (Timezone shift)
+              const [year, month, day] = data.split('-');
+              const dataObj = new Date(year, month - 1, day);
               const dataFormatada = dataObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
 
               return (
