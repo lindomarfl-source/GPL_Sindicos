@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Building, MapPin, Mail, Phone, Hash, ShieldCheck } from 'lucide-react';
+import { X, User, Building, MapPin, Mail, Phone, Hash, ShieldCheck, MessageSquare } from 'lucide-react';
 import { Button, Card } from './Common';
 
 const InputField = ({ label, icon: Icon, name, type = "text", placeholder, value, onChange }) => (

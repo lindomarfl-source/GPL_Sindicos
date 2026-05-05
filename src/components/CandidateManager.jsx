@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useCandidates } from '../context/CandidatesContext';
 import { Card, Badge, Button } from './Common';
 import { CandidateModal } from './CandidateModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
-import { Search, Plus, Filter, ArrowRight, Edit2, Trash2, Users } from 'lucide-react';
+import { Search, Plus, Filter, ArrowRight, Edit2, Trash2, Users, Download, Upload } from 'lucide-react';
 
 export const CandidateManager = ({ onSelectCandidate }) => {
   const { candidates, addCandidate, updateCandidate, deleteCandidate } = useCandidates();
@@ -12,11 +12,46 @@ export const CandidateManager = ({ onSelectCandidate }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState(null);
   const [candidateToDelete, setCandidateToDelete] = useState(null);
+  const fileInputRef = useRef(null);
 
   const filteredCandidates = candidates.filter(c => 
     c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
     c.responsavel.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDownloadJson = () => {
+    const dataStr = JSON.stringify(candidates, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const exportFileDefaultName = 'candidatos_export.json';
+
+    let linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  const handleUploadJson = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const fileReader = new FileReader();
+    fileReader.readAsText(file, "UTF-8");
+    fileReader.onload = async (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        const toImport = Array.isArray(parsed) ? parsed : [parsed];
+        for (const candidate of toImport) {
+          const { id, created_at, ...cleanCandidate } = candidate;
+          await addCandidate(cleanCandidate);
+        }
+        alert("Importação concluída com sucesso!");
+      } catch (error) {
+        console.error("Erro na importação:", error);
+        alert("Erro ao importar arquivo JSON. Certifique-se de que é um formato válido.");
+      }
+    };
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   return (
     <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
@@ -32,6 +67,15 @@ export const CandidateManager = ({ onSelectCandidate }) => {
           />
         </div>
         <div className="flex gap-2 w-full md:w-auto">
+          <Button variant="secondary" icon={Download} onClick={handleDownloadJson} title="Exportar JSON">Download</Button>
+          <Button variant="secondary" icon={Upload} onClick={() => fileInputRef.current?.click()} title="Importar JSON">Upload</Button>
+          <input 
+            type="file" 
+            accept=".json" 
+            ref={fileInputRef} 
+            onChange={handleUploadJson} 
+            className="hidden" 
+          />
           <Button variant="secondary" icon={Filter}>Filtros</Button>
           <Button icon={Plus} onClick={() => {
             setEditingCandidate(null);
