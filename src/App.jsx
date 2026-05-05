@@ -8,7 +8,8 @@ import { CandidateDetails } from './components/CandidateDetails';
 import { DocumentComparator } from './components/DocumentComparator';
 import { QuestionsManager } from './components/QuestionsManager';
 import { ComparisonView } from './components/ComparisonView';
-import { LayoutDashboard, Users, BarChart2, LogOut, CheckCircle2, AlertCircle, X, Mic, Swords } from 'lucide-react';
+import { VisitasManager } from './components/VisitasManager';
+import { LayoutDashboard, Users, BarChart2, LogOut, CheckCircle2, AlertCircle, X, Mic, Swords, Calendar } from 'lucide-react';
 
 const Toast = ({ notification }) => {
   if (!notification) return null;
@@ -32,6 +33,18 @@ const App = () => {
   const { isAuthenticated, logout, notification } = useCandidates();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedCandidateId, setSelectedCandidateId] = useState(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   if (!isAuthenticated) return <Login />;
 
@@ -77,6 +90,7 @@ const App = () => {
         <nav className="space-y-2 flex-1">
           <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
           <NavItem id="candidatos" icon={Users} label="Candidatos" />
+          <NavItem id="visitas" icon={Calendar} label="Visitas" />
           <NavItem id="comparativo" icon={BarChart2} label="Comparativo" />
           <NavItem id="batalha" icon={Swords} label="Batalha" />
           <NavItem id="roteiro" icon={Mic} label="Questionário" />
@@ -100,13 +114,20 @@ const App = () => {
             <h2 className="text-xl md:text-3xl font-black text-white tracking-tight">
               {activeTab === 'dashboard' ? 'Dashboard' : 
                activeTab === 'candidatos' ? 'Candidatos' : 
+               activeTab === 'visitas' ? 'Visitas in loco' :
                activeTab === 'comparativo' ? 'Comparativo' : 
                activeTab === 'roteiro' ? 'Questionário Técnico' : 
                activeTab === 'detalhes' ? 'Ficha Técnica' : 'Portal GPL'}
             </h2>
-            <p className="text-[10px] md:text-sm text-slate-500 mt-0.5 font-bold uppercase tracking-widest">
-              Sincronizado com Supabase
-            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="relative flex h-2.5 w-2.5">
+                {isOnline && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>}
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></span>
+              </span>
+              <p className="text-[10px] md:text-sm text-slate-500 font-bold uppercase tracking-widest">
+                Sincronizado com Banco de Dados
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-black text-xs">
@@ -119,6 +140,7 @@ const App = () => {
         
         {activeTab === 'candidatos' && <CandidateManager onSelectCandidate={(id) => { setSelectedCandidateId(id); setActiveTab('detalhes'); }} />}
 
+        {activeTab === 'visitas' && <VisitasManager />}
         {activeTab === 'comparativo' && <DocumentComparator />}
         {activeTab === 'batalha' && <ComparisonView />}
         {activeTab === 'roteiro' && <QuestionsManager />}
@@ -135,6 +157,7 @@ const App = () => {
       <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 px-4 py-3 flex lg:hidden z-50 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         <BottomNavItem id="dashboard" icon={LayoutDashboard} label="Home" />
         <BottomNavItem id="candidatos" icon={Users} label="Lista" />
+        <BottomNavItem id="visitas" icon={Calendar} label="Visitas" />
         <BottomNavItem id="comparativo" icon={BarChart2} label="Matriz" />
         <BottomNavItem id="batalha" icon={Swords} label="Batalha" />
         <button 
