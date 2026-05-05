@@ -370,14 +370,17 @@ export const VisitasManager = () => {
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Data da Visita</label>
-              <input
-                type="date"
+              <select
                 name="data_visita"
                 value={formData.data_visita}
                 onChange={handleInputChange}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                 required
-              />
+              >
+                <option value="" disabled>Selecione a data...</option>
+                <option value="2026-05-06">Quarta-feira - 06/05/2026</option>
+                <option value="2026-05-07">Quinta-feira - 07/05/2026</option>
+              </select>
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hora</label>
