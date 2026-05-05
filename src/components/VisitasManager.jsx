@@ -448,7 +448,7 @@ export const VisitasManager = () => {
               // Formatar a data para evitar bugs de fuso horário (Timezone shift)
               const [year, month, day] = data.split('-');
               const dataObj = new Date(year, month - 1, day);
-              const dataFormatada = dataObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+              const dataFormatada = dataObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
 
               return (
                 <div key={data} className="relative z-10 flex flex-col md:flex-row gap-6 md:justify-center group">
