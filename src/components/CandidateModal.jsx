@@ -30,6 +30,7 @@ export const CandidateModal = ({ isOpen, onClose, onSave, initialData = null }) 
     telefone: '',
     cidade: 'Porto Alegre',
     risco: 'baixo',
+    valor_proposta: '',
     observacao: ''
   });
 
@@ -45,7 +46,11 @@ export const CandidateModal = ({ isOpen, onClose, onSave, initialData = null }) 
   // Sincroniza o estado com initialData quando o modal abre
   React.useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      setFormData({
+        ...initialData,
+        valor_proposta: initialData.valor_proposta || '',
+        observacao: initialData.observacao || ''
+      });
     } else {
       setFormData({
         nome: '',
@@ -55,7 +60,8 @@ export const CandidateModal = ({ isOpen, onClose, onSave, initialData = null }) 
         email: '',
         telefone: '',
         cidade: 'Porto Alegre',
-        parecer: ''
+        valor_proposta: '',
+        observacao: ''
       });
     }
   }, [initialData, isOpen]);
@@ -82,6 +88,8 @@ export const CandidateModal = ({ isOpen, onClose, onSave, initialData = null }) 
       cidade: formData.cidade,
       status: formData.status || initialData?.status || 'Em análise',
       risco: formData.risco || initialData?.risco || 'baixo',
+      valor_proposta: formData.valor_proposta || '',
+      observacao: formData.observacao || '',
       parecer: formData.parecer || initialData?.parecer || ''
     };
     
@@ -168,8 +176,11 @@ export const CandidateModal = ({ isOpen, onClose, onSave, initialData = null }) 
               <InputField label="E-mail" name="email" type="email" value={formData.email} onChange={handleChange} icon={Mail} placeholder="contato@email.com" />
               <InputField label="Telefone / WhatsApp" name="telefone" value={formData.telefone} onChange={handleChange} icon={Phone} placeholder="(51) 99999-9999" />
               
-              <div className="md:col-span-2">
+              <div className="md:col-span-1">
                 <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} icon={MapPin} placeholder="Porto Alegre" />
+              </div>
+              <div className="md:col-span-1">
+                <InputField label="Valor da Proposta" name="valor_proposta" value={formData.valor_proposta} onChange={handleChange} icon={Hash} placeholder="R$ 0,00" />
               </div>
 
               <div className="md:col-span-2 space-y-1.5">
