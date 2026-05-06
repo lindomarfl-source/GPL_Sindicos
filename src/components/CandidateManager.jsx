@@ -3,7 +3,8 @@ import { useCandidates } from '../context/CandidatesContext';
 import { Card, Badge, Button } from './Common';
 import { CandidateModal } from './CandidateModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
-import { Search, Plus, Filter, ArrowRight, Edit2, Trash2, Users, Download, Upload } from 'lucide-react';
+import { Search, Plus, Filter, ArrowRight, Edit2, Trash2, Users, Download, Upload, FileText } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 
 export const CandidateManager = ({ onSelectCandidate }) => {
   const { candidates, addCandidate, updateCandidate, deleteCandidate } = useCandidates();
@@ -53,6 +54,52 @@ export const CandidateManager = ({ onSelectCandidate }) => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  const handleDownloadPdf = () => {
+    const doc = new jsPDF();
+    
+    doc.setFontSize(18);
+    doc.setTextColor(30, 58, 138); // blue-900
+    doc.text('Relatório de Candidatos a Síndico', 14, 22);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')} | Total: ${filteredCandidates.length}`, 14, 30);
+    
+    let yPos = 45;
+    
+    filteredCandidates.forEach((c) => {
+      if (yPos > 260) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      // Background card
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(14, yPos - 5, 182, 35, 2, 2, 'FD');
+      
+      doc.setFontSize(12);
+      doc.setTextColor(15, 23, 42);
+      doc.setFont(undefined, 'bold');
+      doc.text(c.nome.toUpperCase(), 18, yPos + 2);
+      
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(71, 85, 105);
+      
+      doc.text(`Tipo: ${c.tipo} | Registro: ${c.registro || 'Não informado'}`, 18, yPos + 10);
+      doc.text(`Responsável: ${c.responsavel || 'Não informado'} | Contato: ${c.telefone || 'Não informado'}`, 18, yPos + 16);
+      doc.text(`Status: ${c.status || 'Em análise'} | Risco: ${(c.risco || 'Baixo').toUpperCase()}`, 18, yPos + 22);
+      
+      const val = c.valor_proposta ? ` | Proposta: ${c.valor_proposta}` : '';
+      doc.text(`Cidade: ${c.cidade || 'Não informada'}${val}`, 18, yPos + 28);
+      
+      yPos += 40;
+    });
+    
+    doc.save('relatorio-candidatos.pdf');
+  };
+
   return (
     <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-900/40 p-4 rounded-2xl border border-slate-800">
@@ -66,8 +113,9 @@ export const CandidateManager = ({ onSelectCandidate }) => {
             className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           />
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
-          <Button variant="secondary" icon={Download} onClick={handleDownloadJson} title="Exportar JSON">Download</Button>
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
+          <Button variant="secondary" icon={FileText} onClick={handleDownloadPdf} title="Baixar PDF">PDF</Button>
+          <Button variant="secondary" icon={Download} onClick={handleDownloadJson} title="Exportar JSON">JSON</Button>
           <Button variant="secondary" icon={Upload} onClick={() => fileInputRef.current?.click()} title="Importar JSON">Upload</Button>
           <input 
             type="file" 

@@ -135,6 +135,8 @@ export const CandidatesProvider = ({ children }) => {
       cidade: candidate.cidade || 'Porto Alegre',
       status: candidate.status || 'Em análise',
       risco: candidate.risco || 'baixo',
+      valor_proposta: candidate.valor_proposta || '',
+      observacao: candidate.observacao || '',
       parecer: candidate.parecer || '',
       documentacao: candidate.documentacao || {},
       avaliacao: candidate.avaliacao || {
