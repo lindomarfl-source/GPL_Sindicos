@@ -464,14 +464,17 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
           )}
           <div className="h-6 w-px bg-slate-700 mx-1 hidden md:block"></div>
           <input type="file" accept=".json" ref={fileInputRef} onChange={importCandidateJSON} className="hidden" />
-          <Button variant="secondary" onClick={() => fileInputRef.current?.click()} icon={Upload} className="hidden md:flex text-[10px] md:text-sm" title="Importar JSON">
-            Importar
+          <Button variant="secondary" onClick={() => fileInputRef.current?.click()} icon={Upload} className="flex text-[10px] md:text-sm" title="Importar JSON">
+            <span className="hidden sm:inline">Importar JSON</span>
+            <span className="sm:hidden">Importar</span>
           </Button>
-          <Button variant="secondary" onClick={exportCandidateJSON} icon={Download} className="hidden md:flex text-[10px] md:text-sm" title="Exportar JSON">
-            Exportar
+          <Button variant="secondary" onClick={exportCandidateJSON} icon={Download} className="flex text-[10px] md:text-sm" title="Exportar JSON">
+            <span className="hidden sm:inline">Exportar JSON</span>
+            <span className="sm:hidden">Exportar</span>
           </Button>
-          <Button variant="secondary" onClick={exportPDF} icon={FilePlus} className="flex-1 md:flex-none text-[10px] md:text-sm">
-            Gerar PDF
+          <Button variant="secondary" onClick={exportPDF} icon={FilePlus} className="flex flex-1 md:flex-none text-[10px] md:text-sm" title="Gerar PDF">
+            <span className="hidden sm:inline">Gerar PDF</span>
+            <span className="sm:hidden">PDF</span>
           </Button>
           {saveSuccess && (
             <div className="hidden md:flex items-center gap-2 text-green-400 bg-green-500/10 px-4 py-2 rounded-xl border border-green-500/20">

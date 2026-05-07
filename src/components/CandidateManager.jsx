@@ -17,9 +17,14 @@ export const CandidateManager = ({ onSelectCandidate }) => {
   const fileInputRef = useRef(null);
 
   const filteredCandidates = candidates.filter(c => {
-    const matchesSearch = c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || c.responsavel.toLowerCase().includes(searchTerm.toLowerCase());
+    const responsavelMatches = c.responsavel ? c.responsavel.toLowerCase().includes(searchTerm.toLowerCase()) : false;
+    const matchesSearch = c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || responsavelMatches;
     const matchesStatus = filterStatus === 'Todos' || c.status === filterStatus;
     return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    if (a.status === 'Aprovado' && b.status !== 'Aprovado') return -1;
+    if (a.status !== 'Aprovado' && b.status === 'Aprovado') return 1;
+    return new Date(b.created_at) - new Date(a.created_at);
   });
 
   const counts = {
