@@ -66,10 +66,12 @@ export const Dashboard = ({ onSelectCandidate }) => {
     { name: 'Pessoa Jurídica', value: stats.pj, color: '#a855f7' }
   ];
 
-  const barData = candidates.slice(0, 6).map(c => ({
-    name: c.nome.split(' ')[0],
-    score: (Object.values(c.avaliacao || {}).reduce((a,b) => a+b, 0) / 6).toFixed(1)
-  }));
+  const barData = candidates
+    .filter(c => c.status === 'Aprovado')
+    .map(c => ({
+      name: c.nome.split(' ')[0],
+      score: (Object.values(c.avaliacao || {}).reduce((a,b) => a+b, 0) / 6).toFixed(1)
+    }));
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
