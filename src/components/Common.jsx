@@ -39,6 +39,8 @@ export const Badge = ({ children, status }) => {
     "pendente": "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
     "não entregue": "bg-red-500/10 text-red-400 border-red-500/20",
     "Em análise": "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    "Aprovado": "bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_8px_rgba(34,197,94,0.3)]",
+    "Reprovado": "bg-red-500/10 text-red-400 border-red-500/20 opacity-80",
     "Finalizado": "bg-purple-500/10 text-purple-400 border-purple-500/20",
   };
 
