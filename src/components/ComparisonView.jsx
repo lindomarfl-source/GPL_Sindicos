@@ -27,7 +27,7 @@ const AttributeGlow = ({ label, value, color, icon: Icon }) => {
     </div>
     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-300">{label}</span>
     <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
-      <div className="h-full transition-all duration-1000" style={{ width: `${(safeValue/5)*100}%`, backgroundColor: color }}></div>
+      {safeValue > 0 && <div className="h-full transition-all duration-1000" style={{ width: `${(safeValue/5)*100}%`, backgroundColor: color }}></div>}
     </div>
   </div>
 )};
@@ -49,8 +49,8 @@ const ScenarioMatch = ({ title, description, icon: Icon, scores }) => {
           <p className="text-xs text-slate-500 leading-relaxed mb-4">{description}</p>
           <div className="flex items-center gap-4">
             <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden flex">
-              <div className="h-full transition-all" style={{ width: `${(s0/total)*100}%`, backgroundColor: '#3b82f6' }}></div>
-              <div className="h-full transition-all" style={{ width: `${(s1/total)*100}%`, backgroundColor: '#a855f7' }}></div>
+              {s0 > 0 && <div className="h-full transition-all" style={{ width: `${(s0/total)*100}%`, backgroundColor: '#3b82f6' }}></div>}
+              {s1 > 0 && <div className="h-full transition-all" style={{ width: `${(s1/total)*100}%`, backgroundColor: '#a855f7' }}></div>}
             </div>
             <span className="text-[10px] font-black text-blue-400 uppercase">Eficiência: {Math.max(s0, s1).toFixed(1)}</span>
           </div>
@@ -84,7 +84,7 @@ const DocumentCompliance = ({ candidate, globalDocTypes }) => {
          <span className="text-xs font-black text-slate-400">{delivered} / {requiredDocs.length} Docs ({pct}%)</span>
       </div>
       <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-        <div className="h-full transition-all duration-1000 bg-green-500" style={{ width: `${pct}%` }}></div>
+        {pct > 0 && <div className="h-full transition-all duration-1000 bg-green-500" style={{ width: `${pct}%` }}></div>}
       </div>
     </div>
   );
