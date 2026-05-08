@@ -249,21 +249,7 @@ export const VisitasManager = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       
-      {/* TABS DE RODADAS */}
-      <div className="flex items-center gap-4 border-b border-slate-800 pb-0">
-        <button 
-           onClick={() => setActiveTab(1)}
-           className={`px-8 py-4 rounded-t-2xl font-black text-sm uppercase tracking-widest transition-all ${activeTab === 1 ? 'bg-blue-600 text-white shadow-[0_-5px_20px_rgba(37,99,235,0.2)]' : 'bg-slate-900/50 text-slate-500 hover:text-slate-300 hover:bg-slate-800'}`}
-        >
-          1ª Rodada
-        </button>
-        <button 
-           onClick={() => setActiveTab(2)}
-           className={`px-8 py-4 rounded-t-2xl font-black text-sm uppercase tracking-widest transition-all ${activeTab === 2 ? 'bg-purple-600 text-white shadow-[0_-5px_20px_rgba(147,51,234,0.2)]' : 'bg-slate-900/50 text-slate-500 hover:text-slate-300 hover:bg-slate-800'}`}
-        >
-          2ª Rodada
-        </button>
-      </div>
+
       
       {/* Dashboard Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -443,6 +429,22 @@ export const VisitasManager = () => {
             </button>
           </div>
         </form>
+      </div>
+
+            {/* TABS DE RODADAS */}
+      <div className="flex items-center gap-4 border-b border-slate-800 pb-0">
+        <button 
+           onClick={() => setActiveTab(1)}
+           className={`px-8 py-4 rounded-t-2xl font-black text-sm uppercase tracking-widest transition-all ${activeTab === 1 ? 'bg-blue-600 text-white shadow-[0_-5px_20px_rgba(37,99,235,0.2)]' : 'bg-slate-900/50 text-slate-500 hover:text-slate-300 hover:bg-slate-800'}`}
+        >
+          1ª Rodada
+        </button>
+        <button 
+           onClick={() => setActiveTab(2)}
+           className={`px-8 py-4 rounded-t-2xl font-black text-sm uppercase tracking-widest transition-all ${activeTab === 2 ? 'bg-purple-600 text-white shadow-[0_-5px_20px_rgba(147,51,234,0.2)]' : 'bg-slate-900/50 text-slate-500 hover:text-slate-300 hover:bg-slate-800'}`}
+        >
+          2ª Rodada
+        </button>
       </div>
 
       {/* Timeline */}
