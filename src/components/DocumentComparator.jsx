@@ -10,9 +10,13 @@ export const DocumentComparator = () => {
   const { candidates, globalDocTypes } = useCandidates();
   const [searchTerm, setSearchTerm] = React.useState('');
 
-  const filteredCandidates = candidates.filter(c => 
-    c.nome.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCandidates = candidates
+    .filter(c => c.nome.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => {
+      if (a.status === 'Aprovado' && b.status !== 'Aprovado') return -1;
+      if (b.status === 'Aprovado' && a.status !== 'Aprovado') return 1;
+      return a.nome.localeCompare(b.nome);
+    });
 
   const getStatusIcon = (candidate, docKey) => {
     const status = (candidate.documentacao?.[docKey] || '').toLowerCase();
