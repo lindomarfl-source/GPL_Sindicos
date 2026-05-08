@@ -6,6 +6,7 @@ import { Calendar, Clock, Edit2, Trash2, Plus, Download, Upload, AlertCircle, Ma
 export const VisitasManager = () => {
   const { showNotification } = useCandidates();
   const [visitas, setVisitas] = useState([]);
+  const [activeTab, setActiveTab] = useState(1);
   const [loading, setLoading] = useState(true);
   
   const fileInputRef = useRef(null);
@@ -70,7 +71,7 @@ export const VisitasManager = () => {
       } else {
         const { data, error } = await supabase
           .from('visitas')
-          .insert([{ ...formData, realizada: false }])
+          .insert([{ ...formData, realizada: false, rodada: activeTab }])
           .select();
           
         if (error) throw error;
@@ -200,7 +201,8 @@ export const VisitasManager = () => {
         const cleanedData = importedData.map(({ id, created_at, updated_at, cadastro, ...rest }) => ({
            ...rest,
            nome_candidato: rest.nome_candidato || 'Importado sem nome',
-           realizada: rest.realizada || false
+           realizada: rest.realizada || false,
+           rodada: activeTab
         }));
 
         const { data, error } = await supabase
@@ -229,8 +231,10 @@ export const VisitasManager = () => {
     reader.readAsText(file);
   };
 
+  const filteredVisitas = visitas.filter(v => (v.rodada || 1) === activeTab);
+
   // Agrupar visitas por data
-  const groupedVisitas = visitas.reduce((acc, visita) => {
+  const groupedVisitas = filteredVisitas.reduce((acc, visita) => {
     if (!acc[visita.data_visita]) {
       acc[visita.data_visita] = [];
     }
@@ -238,12 +242,28 @@ export const VisitasManager = () => {
     return acc;
   }, {});
 
-  const totalVisitas = visitas.length;
-  const visitasRealizadas = visitas.filter(v => v.realizada).length;
+  const totalVisitas = filteredVisitas.length;
+  const visitasRealizadas = filteredVisitas.filter(v => v.realizada).length;
   const visitasPendentes = totalVisitas - visitasRealizadas;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      
+      {/* TABS DE RODADAS */}
+      <div className="flex items-center gap-4 border-b border-slate-800 pb-0">
+        <button 
+           onClick={() => setActiveTab(1)}
+           className={`px-8 py-4 rounded-t-2xl font-black text-sm uppercase tracking-widest transition-all ${activeTab === 1 ? 'bg-blue-600 text-white shadow-[0_-5px_20px_rgba(37,99,235,0.2)]' : 'bg-slate-900/50 text-slate-500 hover:text-slate-300 hover:bg-slate-800'}`}
+        >
+          1ª Rodada
+        </button>
+        <button 
+           onClick={() => setActiveTab(2)}
+           className={`px-8 py-4 rounded-t-2xl font-black text-sm uppercase tracking-widest transition-all ${activeTab === 2 ? 'bg-purple-600 text-white shadow-[0_-5px_20px_rgba(147,51,234,0.2)]' : 'bg-slate-900/50 text-slate-500 hover:text-slate-300 hover:bg-slate-800'}`}
+        >
+          2ª Rodada
+        </button>
+      </div>
       
       {/* Dashboard Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -370,17 +390,14 @@ export const VisitasManager = () => {
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Data da Visita</label>
-              <select
+              <input
+                type="date"
                 name="data_visita"
                 value={formData.data_visita}
                 onChange={handleInputChange}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                 required
-              >
-                <option value="" disabled>Selecione a data...</option>
-                <option value="2026-05-06">Quarta-feira - 06/05/2026</option>
-                <option value="2026-05-07">Quinta-feira - 07/05/2026</option>
-              </select>
+              />
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hora</label>
