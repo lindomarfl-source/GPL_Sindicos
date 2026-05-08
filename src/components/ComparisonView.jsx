@@ -201,7 +201,7 @@ export const ComparisonView = () => {
               <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center border-2 border-slate-700 shadow-xl">
                  <span className="text-2xl font-black italic text-slate-400">VS</span>
               </div>
-              <div className="h-20 w-px bg-gradient-to-b from-slate-700 to-transparent"></div>
+              <div className="h-20 w-[2px] bg-slate-800/50"></div>
             </div>
 
             <div className="text-center space-y-4 animate-in slide-in-from-right duration-700">
