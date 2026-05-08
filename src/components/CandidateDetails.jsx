@@ -134,6 +134,7 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [localParecer, setLocalParecer] = useState('');
+  const [localExp, setLocalExp] = useState({ vgv: '', unidades: '', torres: '' });
   const reportRef = useRef();
   const fileInputRef = useRef();
   
@@ -145,6 +146,7 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
   React.useEffect(() => {
     if (candidate) {
       setLocalParecer(candidate.parecer || '');
+      setLocalExp(candidate.experiencia || { vgv: '', unidades: '', torres: '' });
     }
   }, [candidateId, candidate?.id]);
 
@@ -162,10 +164,9 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
     });
   };
 
-  const updateExperience = (key, val) => {
-    const expData = { ...(candidate.experiencia || {}) };
+  const updateExperience = () => {
     updateCandidate(candidate.id, {
-      experiencia: { ...expData, [key]: val }
+      experiencia: localExp
     });
   };
 
@@ -557,8 +558,9 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
                 </div>
                 <input 
                   type="text" 
-                  value={candidate.experiencia?.vgv || ''} 
-                  onChange={(e) => updateExperience('vgv', e.target.value)}
+                  value={localExp.vgv || ''} 
+                  onChange={(e) => setLocalExp({ ...localExp, vgv: e.target.value })}
+                  onBlur={updateExperience}
                   className="bg-transparent text-right text-slate-100 font-bold outline-none focus:text-blue-400 w-32"
                   placeholder="Ex: 50M"
                 />
@@ -569,8 +571,9 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
                 </div>
                 <input 
                   type="number" 
-                  value={candidate.experiencia?.unidades || ''} 
-                  onChange={(e) => updateExperience('unidades', e.target.value)}
+                  value={localExp.unidades || ''} 
+                  onChange={(e) => setLocalExp({ ...localExp, unidades: e.target.value })}
+                  onBlur={updateExperience}
                   className="bg-transparent text-right text-slate-100 font-bold outline-none focus:text-blue-400 w-20"
                   placeholder="0"
                 />
@@ -581,8 +584,9 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
                 </div>
                 <input 
                   type="number" 
-                  value={candidate.experiencia?.torres || ''} 
-                  onChange={(e) => updateExperience('torres', e.target.value)}
+                  value={localExp.torres || ''} 
+                  onChange={(e) => setLocalExp({ ...localExp, torres: e.target.value })}
+                  onBlur={updateExperience}
                   className="bg-transparent text-right text-slate-100 font-bold outline-none focus:text-blue-400 w-20"
                   placeholder="0"
                 />
