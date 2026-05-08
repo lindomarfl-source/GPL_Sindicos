@@ -7,7 +7,7 @@ import {
   Users, Scale, AlertTriangle, 
   ChevronRight, Brain, Rocket, 
   Search, FileDown, Trophy, 
-  Construction, Gavel, Wallet
+  Construction, Gavel, Wallet, FileSearch
 } from 'lucide-react';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar, Tooltip as RechartsTooltip } from 'recharts';
 import html2canvas from 'html2canvas';
@@ -60,10 +60,41 @@ const ScenarioMatch = ({ title, description, icon: Icon, scores }) => {
   );
 };
 
+const ComparisonStat = ({ label, val1, val2 }) => (
+  <div className="flex flex-col gap-2 p-4 bg-slate-900/40 rounded-2xl border border-slate-800/50">
+     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">{label}</span>
+     <div className="flex justify-between items-center px-4">
+        <span className="text-xl font-black text-blue-500">{val1}</span>
+        <span className="text-xl font-black italic text-slate-700">VS</span>
+        <span className="text-xl font-black text-purple-500">{val2}</span>
+     </div>
+  </div>
+);
+
+const DocumentCompliance = ({ candidate, globalDocTypes }) => {
+  const requiredDocs = (globalDocTypes || []).filter(doc => !(doc.category === 'Pessoa Jurídica' && candidate.tipo === 'PF'));
+  const docData = candidate.documentacao || {};
+  const delivered = requiredDocs.filter(doc => (docData[doc.key] || '').toLowerCase() === 'entregue').length;
+  const pct = requiredDocs.length > 0 ? Math.round((delivered / requiredDocs.length) * 100) : 0;
+
+  return (
+    <div className="flex flex-col gap-2 p-4 bg-slate-900/40 rounded-2xl border border-slate-800/50">
+      <div className="flex justify-between items-center mb-1">
+         <span className="text-xs font-black text-white uppercase tracking-tight">{candidate.nome.split(' ')[0]}</span>
+         <span className="text-xs font-black text-slate-400">{delivered} / {requiredDocs.length} Docs ({pct}%)</span>
+      </div>
+      <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+        <div className="h-full transition-all duration-1000 bg-green-500" style={{ width: `${pct}%` }}></div>
+      </div>
+    </div>
+  );
+};
+
 // --- COMPONENTE PRINCIPAL ---
 
 export const ComparisonView = () => {
-  const { candidates } = useCandidates();
+  const { candidates, globalDocTypes } = useCandidates();
+  const [isExporting, setIsExporting] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
 
   const toggleSelect = (id) => {
@@ -79,12 +110,30 @@ export const ComparisonView = () => {
   }, [candidates, selectedIds]);
 
   const handleExportPDF = async () => {
-    const element = document.getElementById('battle-arena');
-    const canvas = await html2canvas(element, { backgroundColor: '#020617', scale: 3 });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    pdf.addImage(imgData, 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
-    pdf.save('GPL_Battle_Report.pdf');
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      const element = document.getElementById('battle-arena');
+      const canvas = await html2canvas(element, { 
+         backgroundColor: '#020617', 
+         scale: 2,
+         useCORS: true,
+         logging: false
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`GPL_Battle_${selectedCandidates[0].nome.split(' ')[0]}_vs_${selectedCandidates[1].nome.split(' ')[0]}.pdf`);
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      alert("Erro ao gerar o PDF da Batalha.");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   if (candidates.length < 2) return <div className="p-20 text-center text-slate-500">Cadastre candidatos primeiro.</div>;
@@ -215,6 +264,45 @@ export const ComparisonView = () => {
              </div>
           </div>
 
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 relative z-10 mt-12">
+             {/* EXPERIENCE MAP */}
+             <div className="space-y-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <Briefcase className="text-blue-400" />
+                  <h4 className="font-black text-white uppercase tracking-widest text-sm">Mapa de Experiência</h4>
+                </div>
+                <div className="space-y-4">
+                  <ComparisonStat 
+                     label="VGV Sob Gestão" 
+                     val1={selectedCandidates[0].experiencia?.vgv || 'N/A'} 
+                     val2={selectedCandidates[1].experiencia?.vgv || 'N/A'} 
+                  />
+                  <ComparisonStat 
+                     label="Total Unidades" 
+                     val1={selectedCandidates[0].experiencia?.unidades || '0'} 
+                     val2={selectedCandidates[1].experiencia?.unidades || '0'} 
+                  />
+                  <ComparisonStat 
+                     label="Máx. de Torres" 
+                     val1={selectedCandidates[0].experiencia?.torres || '0'} 
+                     val2={selectedCandidates[1].experiencia?.torres || '0'} 
+                  />
+                </div>
+             </div>
+
+             {/* DOCUMENT COMPLIANCE */}
+             <div className="space-y-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <FileSearch className="text-yellow-500" />
+                  <h4 className="font-black text-white uppercase tracking-widest text-sm">Checklist Documental</h4>
+                </div>
+                <div className="space-y-4">
+                   <DocumentCompliance candidate={selectedCandidates[0]} globalDocTypes={globalDocTypes} />
+                   <DocumentCompliance candidate={selectedCandidates[1]} globalDocTypes={globalDocTypes} />
+                </div>
+             </div>
+          </div>
+
           {/* FINAL VERDICT BOX */}
           <div className="p-8 bg-blue-600 rounded-[30px] shadow-2xl shadow-blue-900/40 flex flex-col md:flex-row items-center justify-between gap-8 animate-in bounce-in duration-1000 relative overflow-hidden">
              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
@@ -242,9 +330,11 @@ export const ComparisonView = () => {
           <div className="flex justify-center pt-10">
             <button 
               onClick={handleExportPDF}
-              className="flex items-center gap-2 text-slate-500 hover:text-white transition-all text-sm font-bold opacity-40 hover:opacity-100"
+              disabled={isExporting}
+              className={`flex items-center gap-2 transition-all text-sm font-bold px-6 py-3 rounded-full border border-slate-700 bg-slate-900/50 hover:bg-slate-800 ${isExporting ? 'text-slate-600 opacity-50 cursor-not-allowed' : 'text-slate-300 hover:text-white hover:border-slate-500'}`}
             >
-              <FileDown size={16} /> DOWNLOAD BATTLE REPORT PDF
+              <FileDown size={18} className={isExporting ? 'animate-bounce' : ''} /> 
+              {isExporting ? 'GERANDO PDF...' : 'BAIXAR BATTLE REPORT (PDF)'}
             </button>
           </div>
         </div>
