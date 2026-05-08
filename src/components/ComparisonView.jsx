@@ -139,7 +139,7 @@ export const ComparisonView = () => {
       // O a4 é fixo em 297mm. Se passar, vai cortar. Como o grid tem 2 colunas, deve caber em A4.
       
       pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`GPL_Battle_${selectedCandidates[0].nome.split(' ')[0]}_vs_${selectedCandidates[1].nome.split(' ')[0]}.pdf`);
+      pdf.save(`GPL_Duelo_${selectedCandidates[0].nome.split(' ')[0]}_vs_${selectedCandidates[1].nome.split(' ')[0]}.pdf`);
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
       alert("Erro ao gerar o PDF: " + (error.message || error));
@@ -157,7 +157,7 @@ export const ComparisonView = () => {
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none"></div>
         <div className="text-center relative z-10">
           <Badge status="Em análise">Arena de Duelo Técnico</Badge>
-          <h2 className="text-4xl font-black text-white uppercase tracking-tighter mt-4">Selection Battlefield</h2>
+          <h2 className="text-4xl font-black text-white uppercase tracking-tighter mt-4">Campo de Batalha</h2>
           <p className="text-slate-500 text-sm font-medium mt-2">Selecione dois perfis para iniciar o confronto direto de dados.</p>
         </div>
 
@@ -346,7 +346,7 @@ export const ComparisonView = () => {
               className={`flex items-center gap-2 transition-all text-sm font-bold px-6 py-3 rounded-full border border-slate-700 bg-slate-900/50 hover:bg-slate-800 ${isExporting ? 'text-slate-600 opacity-50 cursor-not-allowed' : 'text-slate-300 hover:text-white hover:border-slate-500'}`}
             >
               <FileDown size={18} className={isExporting ? 'animate-bounce' : ''} /> 
-              {isExporting ? 'GERANDO PDF...' : 'BAIXAR BATTLE REPORT (PDF)'}
+              {isExporting ? 'GERANDO PDF...' : 'BAIXAR RELATÓRIO DO DUELO (PDF)'}
             </button>
           </div>
         </div>
