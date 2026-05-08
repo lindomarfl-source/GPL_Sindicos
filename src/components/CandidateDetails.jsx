@@ -397,28 +397,28 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
   };
 
   // Cálculo reativo de progresso (Monitora mudanças no candidato e nos tipos globais)
-  const progress = React.useMemo(() => {
-    console.log('📊 RECALCULANDO PROGRESSO PARA:', candidate?.nome);
-    if (!candidate || !globalDocTypes || globalDocTypes.length === 0) return 0;
+  const docStats = React.useMemo(() => {
+    if (!candidate || !globalDocTypes || globalDocTypes.length === 0) return { pct: 0, current: 0, total: 0 };
     
-    // 1. Identifica quais documentos são REALMENTE exigidos deste candidato
     const requiredDocs = globalDocTypes.filter(doc => {
       if (doc.category === 'Pessoa Jurídica' && candidate.tipo === 'PF') return false;
       return true;
     });
 
-    if (requiredDocs.length === 0) return 0;
+    if (requiredDocs.length === 0) return { pct: 0, current: 0, total: 0 };
 
-    // 2. Conta apenas os exigidos que estão marcados como 'entregue'
     const docData = candidate.documentacao || {};
     const deliveredCount = requiredDocs.filter(doc => (docData[doc.key] || '').toLowerCase() === 'entregue').length;
-    
-    // 3. Cálculo final
     const rawProgress = (deliveredCount / requiredDocs.length) * 100;
-    console.log(`✅ Progresso: ${deliveredCount} de ${requiredDocs.length} = ${rawProgress}%`);
     
-    return Math.min(Math.max(rawProgress, 0), 100);
+    return {
+      pct: Math.min(Math.max(Math.round(rawProgress), 0), 100),
+      current: deliveredCount,
+      total: requiredDocs.length
+    };
   }, [candidate, globalDocTypes]);
+
+  const progress = docStats.pct;
 
   // Cálculo reativo de score técnico
   const techScore = React.useMemo(() => {
@@ -532,8 +532,8 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
               </div>
               <ComplianceStatus 
                 label="Checklist Documental" 
-                total={globalDocTypes?.filter(d => !(d.category === 'Pessoa Jurídica' && candidate.tipo === 'PF')).length}
-                current={Object.values(candidate.documentacao || {}).filter(v => v === 'entregue').length}
+                total={docStats.total}
+                current={docStats.current}
               />
               
               <div className="p-4 bg-slate-900/50 rounded-2xl border border-slate-800 space-y-2">

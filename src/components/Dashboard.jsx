@@ -32,7 +32,7 @@ const KPICard = ({ title, value, subtitle, icon: Icon, color, trend }) => (
 );
 
 export const Dashboard = ({ onSelectCandidate }) => {
-  const { candidates } = useCandidates();
+  const { candidates, globalDocTypes } = useCandidates();
 
   if (!candidates || candidates.length === 0) {
     return (
@@ -48,7 +48,12 @@ export const Dashboard = ({ onSelectCandidate }) => {
     pf: candidates.filter(c => c.tipo === 'PF').length,
     pj: candidates.filter(c => c.tipo === 'PJ').length,
     finalizado: candidates.filter(c => c.status === 'Finalizado').length,
-    pendente: candidates.filter(c => Object.values(c.documentacao || {}).some(v => v !== 'entregue')).length,
+    pendente: candidates.filter(c => {
+      const required = (globalDocTypes || []).filter(d => !(d.category === 'Pessoa Jurídica' && c.tipo === 'PF'));
+      if (required.length === 0) return false;
+      const entregues = required.filter(d => ((c.documentacao || {})[d.key] || '').toLowerCase() === 'entregue').length;
+      return entregues < required.length;
+    }).length,
     highScore: Math.max(...candidates.map(c => {
       const vals = Object.values(c.avaliacao || {});
       return vals.length ? (vals.reduce((a,b) => a+(Number(b)||0), 0) / vals.length) : 0;
