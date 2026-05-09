@@ -284,6 +284,14 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
       doc.text(String(candidate.nome || '').toUpperCase(), 15, currentY);
       currentY += 8;
       
+      if (candidate.tipo === 'PJ' && candidate.responsavel) {
+        doc.setFontSize(10);
+        doc.setTextColor(59, 130, 246); // Blue color for responsavel
+        doc.text(`SÍNDICO RESP: ${String(candidate.responsavel).toUpperCase()}`, 15, currentY);
+        currentY += 6;
+        doc.setTextColor(...primaryColor);
+      }
+      
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.text(`Registro: ${candidate.registro || 'N/A'} | Tipo: ${candidate.tipo}`, 15, currentY);
@@ -501,7 +509,13 @@ export const CandidateDetails = ({ candidateId, onBack }) => {
               {candidate.tipo === 'PJ' ? <Building2 size={40} /> : <User size={40} />}
             </div>
             <h3 className="text-xl font-bold text-white mb-1">{candidate.nome}</h3>
-            <p className="text-slate-400 text-sm mb-4">{candidate.tipo === 'PJ' ? 'Empresa Administradora' : 'Candidato morador'}</p>
+            <p className="text-slate-400 text-sm mb-2 font-mono">{candidate.registro || 'Sem Registro'}</p>
+            {candidate.tipo === 'PJ' && candidate.responsavel && (
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg py-1.5 px-4 mb-4 inline-block">
+                <p className="text-blue-400 text-xs font-bold uppercase tracking-widest">Resp: {candidate.responsavel}</p>
+              </div>
+            )}
+            <p className="text-slate-500 text-xs mb-4 uppercase font-bold tracking-wider">{candidate.tipo === 'PJ' ? 'Empresa Administradora' : 'Síndico Morador / Profissional'}</p>
             <div className="flex flex-col items-center gap-3">
               <Badge status={candidate.status}>{candidate.status}</Badge>
               <div className="flex gap-2 mt-2 md:hidden">
