@@ -104,7 +104,8 @@ export const VisitasManager = () => {
 
       if (error) throw error;
       
-      setVisitas(prev => prev.map(v => v.id === confirmModal.id ? data[0] : v).sort((a, b) => {
+      // Usa os dados do formData local para garantir que a UI reflita a alteração instantaneamente e sem depender do payload do banco
+      setVisitas(prev => prev.map(v => v.id === confirmModal.id ? { ...v, ...formData } : v).sort((a, b) => {
            if (a.data_visita === b.data_visita) return a.hora_visita.localeCompare(b.hora_visita);
            return a.data_visita.localeCompare(b.data_visita);
       }));
