@@ -170,7 +170,7 @@ export const CandidateManager = ({ onSelectCandidate }) => {
               <tr className="border-b border-slate-700 bg-slate-800/50">
                 <th className="px-6 py-4 text-slate-400 font-black text-xs uppercase tracking-widest">Candidato / Registro</th>
                 <th className="px-6 py-4 text-slate-400 font-black text-xs uppercase tracking-widest">Tipo</th>
-                <th className="px-6 py-4 text-slate-400 font-black text-xs uppercase tracking-widest text-right">Valor</th>
+                <th className="px-6 py-4 text-slate-400 font-black text-xs uppercase tracking-widest text-right">Proposta R$</th>
                 <th className="px-6 py-4 text-slate-400 font-black text-xs uppercase tracking-widest text-center">Status</th>
                 <th className="px-6 py-4 text-slate-400 font-black text-xs uppercase tracking-widest text-right">Ações de Gestão</th>
               </tr>
