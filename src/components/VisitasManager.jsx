@@ -4,7 +4,7 @@ import { useCandidates } from '../context/CandidatesContext';
 import { Calendar, Clock, Edit2, Trash2, Plus, Download, Upload, AlertCircle, MapPin, CheckCircle2 } from 'lucide-react';
 
 export const VisitasManager = () => {
-  const { showNotification } = useCandidates();
+  const { showNotification, candidates } = useCandidates();
   const [visitas, setVisitas] = useState([]);
   const [activeTab, setActiveTab] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -16,8 +16,10 @@ export const VisitasManager = () => {
   const [currentId, setCurrentId] = useState(null);
   const [formData, setFormData] = useState({
     nome_candidato: '',
+    responsavel: '',
     data_visita: '',
     hora_visita: '',
+    hora_fim: '',
     observacao: ''
   });
 
@@ -53,7 +55,7 @@ export const VisitasManager = () => {
   };
 
   const resetForm = () => {
-    setFormData({ nome_candidato: '', data_visita: '', hora_visita: '', observacao: '' });
+    setFormData({ nome_candidato: '', responsavel: '', data_visita: '', hora_visita: '', hora_fim: '', observacao: '' });
     setIsEditing(false);
     setCurrentId(null);
   };
@@ -95,8 +97,10 @@ export const VisitasManager = () => {
         .from('visitas')
         .update({
           nome_candidato: formData.nome_candidato,
+          responsavel: formData.responsavel,
           data_visita: formData.data_visita,
           hora_visita: formData.hora_visita,
+          hora_fim: formData.hora_fim,
           observacao: formData.observacao
         })
         .eq('id', confirmModal.id)
@@ -168,8 +172,10 @@ export const VisitasManager = () => {
   const handleEditClick = (visita) => {
     setFormData({
       nome_candidato: visita.nome_candidato,
+      responsavel: visita.responsavel || '',
       data_visita: visita.data_visita,
       hora_visita: visita.hora_visita,
+      hora_fim: visita.hora_fim || '',
       observacao: visita.observacao || ''
     });
     setIsEditing(true);
@@ -362,18 +368,29 @@ export const VisitasManager = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-1">
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nome do Síndico / Condomínio</label>
-              <input
-                type="text"
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Empresa / Síndico Aprovado</label>
+              <select
                 name="nome_candidato"
                 value={formData.nome_candidato}
-                onChange={handleInputChange}
-                placeholder="Ex: João (Condomínio Flores)"
+                onChange={(e) => {
+                  const selNome = e.target.value;
+                  const c = candidates.find(cnd => cnd.nome === selNome);
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    nome_candidato: selNome, 
+                    responsavel: c ? (c.responsavel || '') : '' 
+                  }));
+                }}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                 required
-              />
+              >
+                <option value="">Selecione um candidato...</option>
+                {candidates.filter(c => c.status === 'Aprovado').map(c => (
+                  <option key={c.id} value={c.nome}>{c.nome}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Data da Visita</label>
@@ -387,7 +404,7 @@ export const VisitasManager = () => {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hora</label>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hora Início</label>
               <input
                 type="time"
                 name="hora_visita"
@@ -395,6 +412,16 @@ export const VisitasManager = () => {
                 onChange={handleInputChange}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                 required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hora Fim</label>
+              <input
+                type="time"
+                name="hora_fim"
+                value={formData.hora_fim}
+                onChange={handleInputChange}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
               />
             </div>
           </div>
