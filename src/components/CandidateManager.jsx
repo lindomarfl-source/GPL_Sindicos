@@ -170,6 +170,7 @@ export const CandidateManager = ({ onSelectCandidate }) => {
               <tr className="border-b border-slate-700 bg-slate-800/50">
                 <th className="px-6 py-4 text-slate-400 font-black text-xs uppercase tracking-widest">Candidato / Registro</th>
                 <th className="px-6 py-4 text-slate-400 font-black text-xs uppercase tracking-widest">Tipo</th>
+                <th className="px-6 py-4 text-slate-400 font-black text-xs uppercase tracking-widest text-right">Valor</th>
                 <th className="px-6 py-4 text-slate-400 font-black text-xs uppercase tracking-widest text-center">Status</th>
                 <th className="px-6 py-4 text-slate-400 font-black text-xs uppercase tracking-widest text-right">Ações de Gestão</th>
               </tr>
@@ -194,12 +195,18 @@ export const CandidateManager = ({ onSelectCandidate }) => {
                   >
                     <td className="px-6 py-5">
                       <div className="font-bold text-slate-100 group-hover:text-blue-400 transition-colors uppercase tracking-tight">{candidate.nome}</div>
-                      <div className="text-[10px] text-slate-500 font-mono mt-1">{candidate.registro}</div>
+                      <div className="text-[10px] text-slate-500 font-mono mt-1">
+                        {candidate.registro}
+                        {candidate.tipo === 'PJ' && candidate.responsavel ? ` • Resp: ${candidate.responsavel}` : ''}
+                      </div>
                     </td>
                     <td className="px-6 py-5">
                       <span className={`text-[10px] px-2 py-1 rounded font-black uppercase tracking-tighter ${candidate.tipo === 'PJ' ? 'bg-purple-500/10 text-purple-400' : 'bg-blue-500/10 text-blue-400'}`}>
                         {candidate.tipo}
                       </span>
+                    </td>
+                    <td className="px-6 py-5 text-right">
+                      <span className="font-mono text-slate-300 text-sm">{candidate.valor_proposta || '-'}</span>
                     </td>
                     <td className="px-6 py-5 text-center">
                       <Badge status={candidate.status}>{candidate.status}</Badge>
@@ -262,16 +269,22 @@ export const CandidateManager = ({ onSelectCandidate }) => {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-black text-white uppercase tracking-tight text-lg">{candidate.nome}</h3>
-                    <p className="text-[10px] text-slate-500 font-mono mt-1">{candidate.registro}</p>
+                    <p className="text-[10px] text-slate-500 font-mono mt-1">
+                      {candidate.registro}
+                      {candidate.tipo === 'PJ' && candidate.responsavel ? ` • Resp: ${candidate.responsavel}` : ''}
+                    </p>
                   </div>
                   <Badge status={candidate.status}>{candidate.status}</Badge>
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-slate-800/50">
-                  <div className="flex gap-4">
+                  <div className="flex items-center gap-4">
                     <span className={`text-[10px] px-2 py-1 rounded font-black uppercase tracking-tighter ${candidate.tipo === 'PJ' ? 'bg-purple-500/10 text-purple-400' : 'bg-blue-500/10 text-blue-400'}`}>
                       {candidate.tipo}
                     </span>
+                    {candidate.valor_proposta && (
+                      <span className="font-mono text-slate-400 text-xs">{candidate.valor_proposta}</span>
+                    )}
                   </div>
                   
                   <div className="flex gap-2">
