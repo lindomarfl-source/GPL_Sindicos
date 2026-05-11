@@ -3,7 +3,7 @@ import { useCandidates } from '../context/CandidatesContext';
 import { Card, Badge, Button } from './Common';
 import { CandidateModal } from './CandidateModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
-import { Search, Plus, Filter, ArrowRight, Edit2, Trash2, Users, Download, Upload, FileText } from 'lucide-react';
+import { Search, Plus, Filter, ArrowRight, Edit2, Trash2, Users, Download, Upload, FileText, Eye, EyeOff } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 
 export const CandidateManager = ({ onSelectCandidate }) => {
@@ -105,7 +105,7 @@ export const CandidateManager = ({ onSelectCandidate }) => {
       doc.text(`Responsável: ${c.responsavel || 'Não informado'} | Contato: ${c.telefone || 'Não informado'}`, 18, yPos + 16);
       doc.text(`Status: ${c.status || 'Em análise'} | Risco: ${(c.risco || 'Baixo').toUpperCase()}`, 18, yPos + 22);
       
-      const val = c.valor_proposta ? ` | Proposta: ${c.valor_proposta}` : '';
+      const val = visibleProposals[c.id] ? (c.valor_proposta ? ` | Proposta: ${c.valor_proposta}` : '') : ' | Proposta: R$ •••••';
       doc.text(`Cidade: ${c.cidade || 'Não informada'}${val}`, 18, yPos + 28);
       
       yPos += 40;
@@ -206,7 +206,22 @@ export const CandidateManager = ({ onSelectCandidate }) => {
                       </span>
                     </td>
                     <td className="px-6 py-5 text-right">
-                      <span className="font-mono text-slate-300 text-sm">{candidate.valor_proposta || '-'}</span>
+                      <button 
+                        onClick={(e) => toggleProposal(e, candidate.id)}
+                        className="font-mono text-slate-300 text-sm hover:text-white transition-colors flex items-center justify-end gap-2 w-full ml-auto"
+                      >
+                        {visibleProposals[candidate.id] ? (
+                          <>
+                            {candidate.valor_proposta || '-'}
+                            <EyeOff size={14} className="text-slate-500" />
+                          </>
+                        ) : (
+                          <>
+                            R$ •••••
+                            <Eye size={14} className="text-slate-500" />
+                          </>
+                        )}
+                      </button>
                     </td>
                     <td className="px-6 py-5 text-center">
                       <Badge status={candidate.status}>{candidate.status}</Badge>
