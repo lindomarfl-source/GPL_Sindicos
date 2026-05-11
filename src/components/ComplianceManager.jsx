@@ -86,28 +86,57 @@ const FACTORS = {
 };
 
 export const ComplianceManager = () => {
-  const { candidates, showNotification, refreshData } = useCandidates();
+  const { candidates, showNotification, refreshData, globalDocTypes } = useCandidates();
   const [selectedCandidateId, setSelectedCandidateId] = useState('');
   const [candidate, setCandidate] = useState(null);
   const [formData, setFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+
+  // Replaces the static juridica items with the ones from globalDocTypes
+  const dynamicModel = {
+    ...COMPLIANCE_MODEL,
+    juridica: {
+      ...COMPLIANCE_MODEL.juridica,
+      items: (globalDocTypes || []).map(doc => ({
+        id: doc.key,
+        label: doc.label,
+        peso: Math.round(30 / (globalDocTypes?.length || 1)),
+        penalty: doc.key.toLowerCase().includes('criminal') ? 15 : (doc.key.toLowerCase().includes('fiscal') ? 10 : 0)
+      }))
+    }
+  };
 
   // Initialize form data when a candidate is selected
   useEffect(() => {
     if (selectedCandidateId) {
       const c = candidates.find(c => c.id === selectedCandidateId);
       setCandidate(c);
-      if (c && c.compliance) {
-        setFormData(c.compliance);
-      } else {
-        // Initialize empty state
-        const initial = {};
-        Object.keys(COMPLIANCE_MODEL).forEach(pillarKey => {
-          initial[pillarKey] = {};
-          COMPLIANCE_MODEL[pillarKey].items.forEach(item => {
-            initial[pillarKey][item.id] = { status: 'AUSENTE', qualidade: 'REGULAR', comments: '' };
-          });
+      
+      const initial = {};
+      Object.keys(dynamicModel).forEach(pillarKey => {
+        initial[pillarKey] = {};
+        dynamicModel[pillarKey].items.forEach(item => {
+          let defaultStatus = 'AUSENTE';
+          // Auto-select if marked in candidate's documentacao
+          if (pillarKey === 'juridica' && c?.documentacao?.[item.id] === true) {
+            defaultStatus = 'ENTREGUE';
+          }
+          initial[pillarKey][item.id] = { status: defaultStatus, qualidade: 'REGULAR', comments: '' };
         });
+      });
+
+      if (c && c.compliance) {
+        // Merge existing compliance data with the dynamically generated initial state
+        const merged = { ...initial };
+        Object.keys(c.compliance).forEach(pk => {
+          if (merged[pk]) {
+            Object.keys(c.compliance[pk]).forEach(itemKey => {
+              merged[pk][itemKey] = c.compliance[pk][itemKey];
+            });
+          }
+        });
+        setFormData(merged);
+      } else {
         setFormData(initial);
       }
     } else {
@@ -134,9 +163,9 @@ export const ComplianceManager = () => {
     let totalPenalty = 0;
     const pillarScores = {};
 
-    Object.keys(COMPLIANCE_MODEL).forEach(pillarKey => {
+    Object.keys(dynamicModel).forEach(pillarKey => {
       let pScore = 0;
-      COMPLIANCE_MODEL[pillarKey].items.forEach(item => {
+      dynamicModel[pillarKey].items.forEach(item => {
         const data = formData[pillarKey]?.[item.id] || { status: 'AUSENTE', qualidade: 'REGULAR' };
         const sFactor = FACTORS.status[data.status] || 0;
         const qFactor = data.status === 'AUSENTE' ? 0 : (FACTORS.qualidade[data.qualidade] || 0);
@@ -196,9 +225,9 @@ NOTA FINAL: ${scores.finalScore.toFixed(2)} / 100
 (Pontuação Técnica: ${scores.totalScore.toFixed(2)} | Penalidades: -${scores.totalPenalty})
 
 --- DETALHAMENTO POR PILAR ---
-${Object.keys(COMPLIANCE_MODEL).map(pk => `
-[${COMPLIANCE_MODEL[pk].title}] - Nota: ${scores.pillarScores[pk].toFixed(2)} / ${COMPLIANCE_MODEL[pk].weightTotal}
-${COMPLIANCE_MODEL[pk].items.map(item => {
+${Object.keys(dynamicModel).map(pk => `
+[${dynamicModel[pk].title}] - Nota: ${scores.pillarScores[pk].toFixed(2)} / ${dynamicModel[pk].weightTotal}
+${dynamicModel[pk].items.map(item => {
   const d = formData[pk]?.[item.id] || {};
   return ` - ${item.label}: ${d.status} | Qualidade: ${d.qualidade}`;
 }).join('\\n')}
@@ -312,8 +341,8 @@ ${COMPLIANCE_MODEL[pk].items.map(item => {
 
           {/* PILARES */}
           <div className="space-y-6">
-            {Object.keys(COMPLIANCE_MODEL).map(pillarKey => {
-              const pillar = COMPLIANCE_MODEL[pillarKey];
+            {Object.keys(dynamicModel).map(pillarKey => {
+              const pillar = dynamicModel[pillarKey];
               const Icon = pillar.icon;
               const pScore = scores.pillarScores[pillarKey];
               const pPercent = (pScore / pillar.weightTotal) * 100;
