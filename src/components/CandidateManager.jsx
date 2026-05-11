@@ -13,6 +13,7 @@ export const CandidateManager = ({ onSelectCandidate }) => {
   const [visibleProposals, setVisibleProposals] = useState({});
 
   const toggleProposal = (e, id) => {
+    e.preventDefault();
     e.stopPropagation();
     setVisibleProposals(prev => ({...prev, [id]: !prev[id]}));
   };
@@ -112,7 +113,7 @@ export const CandidateManager = ({ onSelectCandidate }) => {
       doc.text(`Responsável: ${c.responsavel || 'Não informado'} | Contato: ${c.telefone || 'Não informado'}`, 18, yPos + 16);
       doc.text(`Status: ${c.status || 'Em análise'} | Risco: ${(c.risco || 'Baixo').toUpperCase()}`, 18, yPos + 22);
       
-      const val = visibleProposals[c.id] ? (c.valor_proposta ? ` | Proposta: ${c.valor_proposta}` : '') : ' | Proposta: R$ •••••';
+      const val = visibleProposals[c.id] ? (c.valor_proposta ? ` | Proposta: ${c.valor_proposta}` : ' | Proposta: Não informada') : ' | Proposta: R$ •••••';
       doc.text(`Cidade: ${c.cidade || 'Não informada'}${val}`, 18, yPos + 28);
       
       yPos += 40;
@@ -219,7 +220,7 @@ export const CandidateManager = ({ onSelectCandidate }) => {
                       >
                         {visibleProposals[candidate.id] ? (
                           <>
-                            {candidate.valor_proposta || '-'}
+                            <span>{candidate.valor_proposta ? candidate.valor_proposta : 'Não informado'}</span>
                             <EyeOff size={14} className="text-slate-500" />
                           </>
                         ) : (
