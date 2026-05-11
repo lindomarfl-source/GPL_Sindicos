@@ -119,7 +119,7 @@ const App = () => {
                activeTab === 'visitas' ? 'Visitas in loco' :
                activeTab === 'comparativo' ? 'Comparativo' : 
                activeTab === 'roteiro' ? 'Questionário Técnico' : 
-               activeTab === 'compliance' ? 'Due Diligence & Compliance' :
+               activeTab === 'compliance' ? 'Diligência e Conformidade & Compliance' :
                activeTab === 'detalhes' ? 'Ficha Técnica' : 'Portal GPL'}
             </h2>
             <div className="flex items-center gap-2 mt-0.5">

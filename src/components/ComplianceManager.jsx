@@ -230,7 +230,7 @@ export const ComplianceManager = () => {
           <div className="text-center p-20 bg-slate-900/30 border border-slate-800 border-dashed rounded-3xl mt-6">
             <ShieldCheck size={48} className="mx-auto text-slate-700 mb-4" />
             <h3 className="text-xl font-bold text-slate-400">Nenhum candidato encontrado</h3>
-            <p className="text-slate-500 mt-2">Cadastre candidatos e atualize seus documentos para gerar o ranking de Due Diligence.</p>
+            <p className="text-slate-500 mt-2">Cadastre candidatos e atualize seus documentos para gerar o ranking de Diligência e Conformidade.</p>
           </div>
         )}
       </div>
