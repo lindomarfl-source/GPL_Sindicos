@@ -48,7 +48,8 @@ export const ComplianceManager = () => {
         const deliveredDocs = [];
 
         items.forEach(item => {
-          if (c.documentacao && c.documentacao[item.id] === true) {
+          const docStatus = (c.documentacao && c.documentacao[item.id]) ? String(c.documentacao[item.id]).toLowerCase() : '';
+          if (docStatus === 'entregue') {
             score += item.peso;
             deliveredDocs.push(item);
           } else {
