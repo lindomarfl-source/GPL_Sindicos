@@ -9,7 +9,8 @@ import { DocumentComparator } from './components/DocumentComparator';
 import { QuestionsManager } from './components/QuestionsManager';
 import { ComparisonView } from './components/ComparisonView';
 import { VisitasManager } from './components/VisitasManager';
-import { LayoutDashboard, Users, BarChart2, LogOut, CheckCircle2, AlertCircle, X, Mic, Swords, Calendar } from 'lucide-react';
+import { ComplianceManager } from './components/ComplianceManager';
+import { LayoutDashboard, Users, BarChart2, LogOut, CheckCircle2, AlertCircle, X, Mic, Swords, Calendar, ShieldCheck } from 'lucide-react';
 
 const Toast = ({ notification }) => {
   if (!notification) return null;
@@ -94,6 +95,7 @@ const App = () => {
           <NavItem id="comparativo" icon={BarChart2} label="Comparativo" />
           <NavItem id="batalha" icon={Swords} label="Batalha" />
           <NavItem id="roteiro" icon={Mic} label="Questionário" />
+          <NavItem id="compliance" icon={ShieldCheck} label="Compliance" />
         </nav>
 
         <div className="pt-6 border-t border-slate-800">
@@ -117,6 +119,7 @@ const App = () => {
                activeTab === 'visitas' ? 'Visitas in loco' :
                activeTab === 'comparativo' ? 'Comparativo' : 
                activeTab === 'roteiro' ? 'Questionário Técnico' : 
+               activeTab === 'compliance' ? 'Due Diligence & Compliance' :
                activeTab === 'detalhes' ? 'Ficha Técnica' : 'Portal GPL'}
             </h2>
             <div className="flex items-center gap-2 mt-0.5">
@@ -144,6 +147,7 @@ const App = () => {
         {activeTab === 'comparativo' && <DocumentComparator />}
         {activeTab === 'batalha' && <ComparisonView />}
         {activeTab === 'roteiro' && <QuestionsManager />}
+        {activeTab === 'compliance' && <ComplianceManager />}
 
         {activeTab === 'detalhes' && (
           <CandidateDetails 
@@ -160,6 +164,7 @@ const App = () => {
         <BottomNavItem id="visitas" icon={Calendar} label="Visitas" />
         <BottomNavItem id="comparativo" icon={BarChart2} label="Matriz" />
         <BottomNavItem id="batalha" icon={Swords} label="Batalha" />
+        <BottomNavItem id="compliance" icon={ShieldCheck} label="Auditoria" />
         <button 
           onClick={logout}
           className="flex flex-col items-center justify-center gap-1 flex-1 py-1 text-slate-500"
