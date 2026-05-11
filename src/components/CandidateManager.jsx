@@ -10,6 +10,13 @@ export const CandidateManager = ({ onSelectCandidate }) => {
   const { candidates, addCandidate, updateCandidate, deleteCandidate } = useCandidates();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
+  const [visibleProposals, setVisibleProposals] = useState({});
+
+  const toggleProposal = (e, id) => {
+    e.stopPropagation();
+    setVisibleProposals(prev => ({...prev, [id]: !prev[id]}));
+  };
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState(null);
