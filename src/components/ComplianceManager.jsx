@@ -3,73 +3,6 @@ import { supabase } from '../lib/supabaseClient';
 import { useCandidates } from '../context/CandidatesContext';
 import { ShieldCheck, AlertTriangle, CheckCircle, FileText, Activity, Lock, Search, Download, ChevronDown, Save } from 'lucide-react';
 
-const COMPLIANCE_MODEL = {
-  juridica: {
-    title: "Regularidade Jurídica",
-    icon: Lock,
-    color: "text-indigo-400",
-    bgIcon: "bg-indigo-500/10",
-    weightTotal: 30,
-    items: [
-      { id: 'cert_criminal', label: 'Certidão Negativa Criminal', peso: 8, penalty: 15 },
-      { id: 'cert_civel', label: 'Certidão Negativa Cível', peso: 5, penalty: 0 },
-      { id: 'cert_fiscal', label: 'Certidão Fiscal', peso: 5, penalty: 10 },
-      { id: 'contrato_social', label: 'Contrato Social/Estatuto', peso: 4, penalty: 0 },
-      { id: 'registro_tecnico', label: 'CR / Registro Técnico', peso: 8, penalty: 0 }
-    ]
-  },
-  operacional: {
-    title: "Capacidade Operacional",
-    icon: Activity,
-    color: "text-blue-400",
-    bgIcon: "bg-blue-500/10",
-    weightTotal: 25,
-    items: [
-      { id: 'plano_gestao', label: 'Plano de Gestão e Operação', peso: 10, penalty: 0 },
-      { id: 'estrutura_op', label: 'Estrutura operacional e suporte', peso: 10, penalty: 10 },
-      { id: 'responsavel_tecnico', label: 'Responsável técnico', peso: 5, penalty: 15 }
-    ]
-  },
-  experiencia: {
-    title: "Experiência Condominial",
-    icon: FileText,
-    color: "text-amber-400",
-    bgIcon: "bg-amber-500/10",
-    weightTotal: 20,
-    items: [
-      { id: 'comprovacao_exp', label: 'Comprovação de experiência', peso: 10, penalty: 12 },
-      { id: 'referencias', label: 'Referências de condomínios', peso: 5, penalty: 0 },
-      { id: 'casos_anteriores', label: 'Casos anteriores', peso: 5, penalty: 0 }
-    ]
-  },
-  governanca: {
-    title: "Governança e Transparência",
-    icon: ShieldCheck,
-    color: "text-emerald-400",
-    bgIcon: "bg-emerald-500/10",
-    weightTotal: 15,
-    items: [
-      { id: 'sla_resposta', label: 'SLA e tempo de resposta', peso: 3, penalty: 0 },
-      { id: 'transparencia_fin', label: 'Transparência financeira', peso: 4, penalty: 0 },
-      { id: 'tecnologia', label: 'Tecnologia e aplicativos', peso: 2, penalty: 0 },
-      { id: 'gestao_incidentes', label: 'Gestão de incidentes', peso: 3, penalty: 0 },
-      { id: 'relatorios_mensais', label: 'Relatórios mensais', peso: 3, penalty: 0 }
-    ]
-  },
-  diferenciais: {
-    title: "Diferenciais Técnicos",
-    icon: CheckCircle,
-    color: "text-purple-400",
-    bgIcon: "bg-purple-500/10",
-    weightTotal: 10,
-    items: [
-      { id: 'certificacoes', label: 'Certificações', peso: 3, penalty: 0 },
-      { id: 'compliance_interno', label: 'Compliance interno', peso: 2, penalty: 0 },
-      { id: 'ppci', label: 'PPCI / Processos', peso: 2, penalty: 0 },
-      { id: 'cases_complexos', label: 'Cases complexos', peso: 3, penalty: 0 }
-    ]
-  }
-};
 
 const FACTORS = {
   status: {
@@ -92,17 +25,45 @@ export const ComplianceManager = () => {
   const [formData, setFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
-  // Replaces the static juridica items with the ones from globalDocTypes
+  // Calculates weights based on criticality and normalizes to 100 points
+  const rawItems = (globalDocTypes || []).map(doc => {
+    const key = doc.key.toLowerCase();
+    const label = doc.label.toLowerCase();
+    let rawPeso = 5;
+    let penalty = 0;
+    
+    // Critérios de criticidade
+    if (key.includes('criminal') || label.includes('criminal') || key.includes('processos') || label.includes('processos')) {
+        rawPeso = 20;
+        penalty = 25; // Risco Altíssimo
+    } else if (key.includes('fiscal') || label.includes('fiscal') || key.includes('receita') || label.includes('receita') || key.includes('fgts') || key.includes('inss') || key.includes('trabalhista') || label.includes('trabalhista')) {
+        rawPeso = 15;
+        penalty = 15; // Risco Alto
+    } else if (key.includes('contrato') || label.includes('contrato') || key.includes('estatuto') || label.includes('estatuto') || key.includes('cnpj') || label.includes('cnpj')) {
+        rawPeso = 10;
+        penalty = 10; // Risco Médio
+    } else {
+        rawPeso = 5;
+        penalty = 0; // Risco Baixo
+    }
+
+    return { id: doc.key, label: doc.label, rawPeso, penalty };
+  });
+
+  const rawSum = rawItems.reduce((acc, item) => acc + item.rawPeso, 0) || 1;
+  const items = rawItems.map(item => ({
+    ...item,
+    peso: parseFloat(((item.rawPeso / rawSum) * 100).toFixed(2))
+  }));
+
   const dynamicModel = {
-    ...COMPLIANCE_MODEL,
-    juridica: {
-      ...COMPLIANCE_MODEL.juridica,
-      items: (globalDocTypes || []).map(doc => ({
-        id: doc.key,
-        label: doc.label,
-        peso: Math.round(30 / (globalDocTypes?.length || 1)),
-        penalty: doc.key.toLowerCase().includes('criminal') ? 15 : (doc.key.toLowerCase().includes('fiscal') ? 10 : 0)
-      }))
+    conformidade: {
+      title: "Conformidade Documental e Risco",
+      icon: ShieldCheck,
+      color: "text-indigo-400",
+      bgIcon: "bg-indigo-500/10",
+      weightTotal: 100,
+      items: items
     }
   };
 
@@ -118,7 +79,7 @@ export const ComplianceManager = () => {
         dynamicModel[pillarKey].items.forEach(item => {
           let defaultStatus = 'AUSENTE';
           // Auto-select if marked in candidate's documentacao
-          if (pillarKey === 'juridica' && c?.documentacao?.[item.id] === true) {
+          if (pillarKey === 'conformidade' && c?.documentacao?.[item.id] === true) {
             defaultStatus = 'ENTREGUE';
           }
           initial[pillarKey][item.id] = { status: defaultStatus, qualidade: 'REGULAR', comments: '' };
