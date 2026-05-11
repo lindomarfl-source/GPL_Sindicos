@@ -526,16 +526,24 @@ export const VisitasManager = () => {
                         <div className="flex justify-between items-start gap-4 pl-2">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
-                              <h4 className={`font-bold text-lg tracking-wide ${visita.realizada ? 'text-slate-300 line-through opacity-70' : 'text-white'}`}>{visita.nome_candidato}</h4>
+                              <div className="flex flex-col">
+                                <h4 className={`font-bold text-lg tracking-wide ${visita.realizada ? 'text-slate-300 line-through opacity-70' : 'text-white'}`}>{visita.nome_candidato}</h4>
+                                {visita.responsavel && (
+                                  <span className="text-xs font-bold text-blue-400 uppercase tracking-widest mt-1">
+                                    Resp: {visita.responsavel}
+                                  </span>
+                                )}
+                              </div>
                               {visita.realizada && (
-                                <span className="bg-green-500/10 text-green-400 text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-md border border-green-500/20">
+                                <span className="bg-green-500/10 text-green-400 text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-md border border-green-500/20 h-fit mt-1">
                                   Concluída
                                 </span>
                               )}
                             </div>
                             <div className="flex items-center gap-3 text-slate-400 text-xs font-semibold mb-4 tracking-wider">
                               <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${visita.realizada ? 'text-green-400/70 bg-green-950/30' : 'text-blue-300 bg-blue-950/40 border border-blue-900/50'}`}>
-                                <Clock size={12} /> {visita.hora_visita.substring(0, 5)}
+                                <Clock size={12} /> {visita.hora_visita ? visita.hora_visita.substring(0, 5) : ''}
+                                {visita.hora_fim ? ` - ${visita.hora_fim.substring(0,5)}` : ''}
                               </span>
                             </div>
                             {visita.observacao && (
