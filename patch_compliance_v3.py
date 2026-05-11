@@ -1,4 +1,8 @@
-import React, { useMemo } from 'react';
+import re
+
+file_path = "/Users/lindomar.fontana/Documents/Meus_Projetos_Antigravity/GPL_Sindicos/src/components/ComplianceManager.jsx"
+
+content = """import React, { useMemo } from 'react';
 import { useCandidates } from '../context/CandidatesContext';
 import { ShieldCheck, AlertTriangle, CheckCircle2, XCircle, Search, Download } from 'lucide-react';
 import { Card } from './Common';
@@ -78,19 +82,19 @@ export const ComplianceManager = () => {
   }, [candidates, globalDocTypes]);
 
   const downloadGlobalReport = () => {
-    let content = `RELATÓRIO GLOBAL DE COMPLIANCE E DUE DILIGENCE\n===============================================\n\n`;
+    let content = `RELATÓRIO GLOBAL DE COMPLIANCE E DUE DILIGENCE\\n===============================================\\n\\n`;
     
     ranking.forEach((c, index) => {
-      content += `${index + 1}. ${c.nome} (CNPJ: ${c.registro || 'N/A'})\n`;
-      content += `   NOTA FINAL: ${c.complianceScore.toFixed(2)} / 100\n`;
-      content += `   Risco: ${c.riskLevel} | Pontuação Base: ${c.baseScore.toFixed(2)} | Penalidades: -${c.penaltyTotal}\n`;
+      content += `${index + 1}. ${c.nome} (CNPJ: ${c.registro || 'N/A'})\\n`;
+      content += `   NOTA FINAL: ${c.complianceScore.toFixed(2)} / 100\\n`;
+      content += `   Risco: ${c.riskLevel} | Pontuação Base: ${c.baseScore.toFixed(2)} | Penalidades: -${c.penaltyTotal}\\n`;
       if (c.missingDocs.length > 0) {
-        content += `   Pendências Críticas:\n`;
+        content += `   Pendências Críticas:\\n`;
         c.missingDocs.forEach(md => {
-          content += `    - [FALTA] ${md.label} (Risco: -${md.penalty} pts)\n`;
+          content += `    - [FALTA] ${md.label} (Risco: -${md.penalty} pts)\\n`;
         });
       }
-      content += `\n-----------------------------------------------\n\n`;
+      content += `\\n-----------------------------------------------\\n\\n`;
     });
 
     const blob = new Blob([content], { type: 'text/plain' });
@@ -193,3 +197,9 @@ export const ComplianceManager = () => {
     </div>
   );
 };
+"""
+
+with open(file_path, "w") as f:
+    f.write(content)
+
+print("Patch v3 applied successfully.")
