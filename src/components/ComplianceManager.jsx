@@ -92,7 +92,13 @@ export const ComplianceManager = () => {
         Object.keys(c.compliance).forEach(pk => {
           if (merged[pk]) {
             Object.keys(c.compliance[pk]).forEach(itemKey => {
-              merged[pk][itemKey] = c.compliance[pk][itemKey];
+              // Copia os dados do compliance salvo (ex: qualidade)
+              merged[pk][itemKey] = { ...merged[pk][itemKey], ...c.compliance[pk][itemKey] };
+              
+              // Sempre forca o status ENTREGUE se a documentacao oficial estiver flegada como true
+              if (pk === 'conformidade' && c?.documentacao?.[itemKey] === true) {
+                merged[pk][itemKey].status = 'ENTREGUE';
+              }
             });
           }
         });
