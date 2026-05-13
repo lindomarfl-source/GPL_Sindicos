@@ -64,7 +64,7 @@ export const CandidateManager = ({ onSelectCandidate }) => {
         const parsed = JSON.parse(e.target.result);
         const toImport = Array.isArray(parsed) ? parsed : [parsed];
         for (const candidate of toImport) {
-          const { id, created_at, ...cleanCandidate } = candidate;
+          const { id: _id, created_at: _created_at, ...cleanCandidate } = candidate;
           await addCandidate(cleanCandidate);
         }
         alert("Importação concluída com sucesso!");
@@ -215,6 +215,7 @@ export const CandidateManager = ({ onSelectCandidate }) => {
                     </td>
                     <td className="px-6 py-5 text-right">
                       <button 
+                        type="button"
                         onClick={(e) => toggleProposal(e, candidate.id)}
                         className="font-mono text-slate-300 text-sm hover:text-white transition-colors flex items-center justify-end gap-2 w-full ml-auto"
                       >
@@ -225,7 +226,7 @@ export const CandidateManager = ({ onSelectCandidate }) => {
                           </>
                         ) : (
                           <>
-                            R$ •••••
+                            <span>R$ •••••</span>
                             <Eye size={14} className="text-slate-500" />
                           </>
                         )}
@@ -305,9 +306,23 @@ export const CandidateManager = ({ onSelectCandidate }) => {
                     <span className={`text-[10px] px-2 py-1 rounded font-black uppercase tracking-tighter ${candidate.tipo === 'PJ' ? 'bg-purple-500/10 text-purple-400' : 'bg-blue-500/10 text-blue-400'}`}>
                       {candidate.tipo}
                     </span>
-                    {candidate.valor_proposta && (
-                      <span className="font-mono text-slate-400 text-xs">{candidate.valor_proposta}</span>
-                    )}
+                    <button 
+                      type="button"
+                      onClick={(e) => toggleProposal(e, candidate.id)}
+                      className="font-mono text-slate-400 text-xs hover:text-white transition-colors flex items-center gap-1.5"
+                    >
+                      {visibleProposals[candidate.id] ? (
+                        <>
+                          <span>{candidate.valor_proposta ? candidate.valor_proposta : 'Não informado'}</span>
+                          <EyeOff size={12} className="text-slate-500" />
+                        </>
+                      ) : (
+                        <>
+                          <span>R$ •••••</span>
+                          <Eye size={12} className="text-slate-500" />
+                        </>
+                      )}
+                    </button>
                   </div>
                   
                   <div className="flex gap-2">
