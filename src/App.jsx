@@ -97,7 +97,7 @@ const App = () => {
           <NavItem id="batalha" icon={Swords} label="Batalha" />
           <NavItem id="roteiro" icon={Mic} label="Questionário" />
           <NavItem id="compliance" icon={ShieldCheck} label="Compliance" />
-          <NavItem id="auditoria" icon={History} label="Auditoria e Histórico" />
+          <NavItem id="auditoria" icon={History} label="Auditoria" />
         </nav>
 
         <div className="pt-6 border-t border-slate-800">
@@ -122,7 +122,7 @@ const App = () => {
                activeTab === 'comparativo' ? 'Comparativo' : 
                activeTab === 'roteiro' ? 'Questionário Técnico' : 
                activeTab === 'compliance' ? 'Diligência e Conformidade & Compliance' :
-               activeTab === 'auditoria' ? 'Trilha de Auditoria e Histórico de Eventos' :
+               activeTab === 'auditoria' ? 'Auditoria' :
                activeTab === 'detalhes' ? 'Ficha Técnica' : 'Portal GPL'}
             </h2>
             <div className="flex items-center gap-2 mt-0.5">
@@ -169,7 +169,7 @@ const App = () => {
         <BottomNavItem id="comparativo" icon={BarChart2} label="Matriz" />
         <BottomNavItem id="batalha" icon={Swords} label="Batalha" />
         <BottomNavItem id="compliance" icon={ShieldCheck} label="Compliance" />
-        <BottomNavItem id="auditoria" icon={History} label="Trilha" />
+        <BottomNavItem id="auditoria" icon={History} label="Auditoria" />
         <button 
           onClick={logout}
           className="flex flex-col items-center justify-center gap-1 flex-1 py-1 text-slate-500"
