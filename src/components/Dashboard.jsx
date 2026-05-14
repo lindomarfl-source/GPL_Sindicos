@@ -103,9 +103,11 @@ export const Dashboard = ({ onSelectCandidate }) => {
     highScore: Math.max(...candidates.map(c => calculateComplianceScore(c))).toFixed(1)
   };
 
-  const topCandidates = [...candidates].sort((a,b) => {
-    return calculateComplianceScore(b) - calculateComplianceScore(a);
-  }).slice(0, 3);
+  const topCandidates = [...candidates]
+    .filter(c => c.status !== 'Reprovado')
+    .sort((a,b) => {
+      return calculateComplianceScore(b) - calculateComplianceScore(a);
+    }).slice(0, 3);
 
   const pieData = [
     { name: 'Pessoa Física', value: stats.pf, color: '#3b82f6' },
@@ -113,11 +115,11 @@ export const Dashboard = ({ onSelectCandidate }) => {
   ];
 
   const barData = candidates
-    .filter(c => c.status === 'Aprovado')
+    .filter(c => c.status !== 'Reprovado')
     .map(c => ({
       name: c.nome.split(' ')[0],
-      score: calculateComplianceScore(c).toFixed(1),
-      docs: Object.values(c.documentacao || {}).filter(v => v === 'entregue').length
+      score: Number(calculateComplianceScore(c).toFixed(1)),
+      docs: Object.values(c.documentacao || {}).filter(v => String(v).toLowerCase() === 'entregue').length
     }));
 
   return (

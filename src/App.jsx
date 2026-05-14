@@ -10,7 +10,8 @@ import { QuestionsManager } from './components/QuestionsManager';
 import { ComparisonView } from './components/ComparisonView';
 import { VisitasManager } from './components/VisitasManager';
 import { ComplianceManager } from './components/ComplianceManager';
-import { LayoutDashboard, Users, BarChart2, LogOut, CheckCircle2, AlertCircle, X, Mic, Swords, Calendar, ShieldCheck } from 'lucide-react';
+import { AuditHistory } from './components/AuditHistory';
+import { LayoutDashboard, Users, BarChart2, LogOut, CheckCircle2, AlertCircle, X, Mic, Swords, Calendar, ShieldCheck, History } from 'lucide-react';
 
 const Toast = ({ notification }) => {
   if (!notification) return null;
@@ -96,6 +97,7 @@ const App = () => {
           <NavItem id="batalha" icon={Swords} label="Batalha" />
           <NavItem id="roteiro" icon={Mic} label="Questionário" />
           <NavItem id="compliance" icon={ShieldCheck} label="Compliance" />
+          <NavItem id="auditoria" icon={History} label="Auditoria e Histórico" />
         </nav>
 
         <div className="pt-6 border-t border-slate-800">
@@ -120,6 +122,7 @@ const App = () => {
                activeTab === 'comparativo' ? 'Comparativo' : 
                activeTab === 'roteiro' ? 'Questionário Técnico' : 
                activeTab === 'compliance' ? 'Diligência e Conformidade & Compliance' :
+               activeTab === 'auditoria' ? 'Trilha de Auditoria e Histórico de Eventos' :
                activeTab === 'detalhes' ? 'Ficha Técnica' : 'Portal GPL'}
             </h2>
             <div className="flex items-center gap-2 mt-0.5">
@@ -148,6 +151,7 @@ const App = () => {
         {activeTab === 'batalha' && <ComparisonView />}
         {activeTab === 'roteiro' && <QuestionsManager />}
         {activeTab === 'compliance' && <ComplianceManager />}
+        {activeTab === 'auditoria' && <AuditHistory />}
 
         {activeTab === 'detalhes' && (
           <CandidateDetails 
@@ -164,7 +168,8 @@ const App = () => {
         <BottomNavItem id="visitas" icon={Calendar} label="Visitas" />
         <BottomNavItem id="comparativo" icon={BarChart2} label="Matriz" />
         <BottomNavItem id="batalha" icon={Swords} label="Batalha" />
-        <BottomNavItem id="compliance" icon={ShieldCheck} label="Auditoria" />
+        <BottomNavItem id="compliance" icon={ShieldCheck} label="Compliance" />
+        <BottomNavItem id="auditoria" icon={History} label="Trilha" />
         <button 
           onClick={logout}
           className="flex flex-col items-center justify-center gap-1 flex-1 py-1 text-slate-500"
