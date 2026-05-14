@@ -427,7 +427,7 @@ export const CandidatesProvider = ({ children }) => {
   };
 
   const login = (password) => {
-    if (password === 'GPL2026') {
+    if (password === '2026GPL') {
       setIsAuthenticated(true);
       localStorage.setItem('gpl_auth', 'true');
       return true;
